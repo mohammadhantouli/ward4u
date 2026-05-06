@@ -1,0 +1,188 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useCartStore } from '../store/cartStore';
+import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LangContext';
+import { supabase } from '../lib/supabase';
+import { sanitizeText, isValidPhone, clampNumber, isRateLimited } from '../utils/security';
+import toast from 'react-hot-toast';
+import './Checkout.css';
+
+const DELIVERY_FEE = 25;
+
+export default function Checkout() {
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
+  const { t } = useLang();
+  const { items, clearCart } = useCartStore();
+  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+  const [form, setForm] = useState({
+    name: profile?.full_name || '',
+    phone: '',
+    city: '',
+    district: '',
+    street: '',
+    notes: '',
+    payment: 'cash_on_delivery',
+  });
+  const [errors, setErrors]     = useState({});
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!user) { navigate('/auth?redirect=/checkout'); return null; }
+  if (items.length === 0) { navigate('/cart'); return null; }
+
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const validate = () => {
+    const errs = {};
+    if (!sanitizeText(form.name) || sanitizeText(form.name).length < 2) errs.name = 'أدخل اسمك الكامل';
+    if (!isValidPhone(form.phone)) errs.phone = 'أدخل رقم جوال سعودي صحيح (05xxxxxxxx)';
+    if (!sanitizeText(form.city))   errs.city   = 'المدينة مطلوبة';
+    if (!sanitizeText(form.street)) errs.street = 'العنوان مطلوب';
+    return errs;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isRateLimited(`checkout-${user.id}`, 3, 120_000)) {
+      toast.error('محاولات كثيرة. انتظر قليلاً.');
+      return;
+    }
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      const deliveryAddress = {
+        name:     sanitizeText(form.name),
+        phone:    sanitizeText(form.phone),
+        city:     sanitizeText(form.city),
+        district: sanitizeText(form.district),
+        street:   sanitizeText(form.street),
+        notes:    sanitizeText(form.notes),
+      };
+
+      const { data: order, error: orderErr } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          total: subtotal + DELIVERY_FEE,
+          delivery_fee: DELIVERY_FEE,
+          delivery_address: deliveryAddress,
+          payment_method: form.payment,
+          notes: sanitizeText(form.notes),
+          status: 'pending',
+        })
+        .select().single();
+
+      if (orderErr) throw orderErr;
+
+      const orderItems = items.map((i) => ({
+        order_id:     order.id,
+        product_id:   i.id,
+        product_name: sanitizeText(i.name_ar || i.name),
+        price:        clampNumber(i.price, 0, 999999),
+        quantity:     clampNumber(i.quantity, 1, 99),
+        image_url:    i.image_url,
+      }));
+
+      const { error: itemsErr } = await supabase.from('order_items').insert(orderItems);
+      if (itemsErr) throw itemsErr;
+
+      clearCart();
+      toast.success('تم تأكيد طلبك بنجاح!');
+      navigate('/orders');
+    } catch (err) {
+      toast.error('حدث خطأ. يرجى المحاولة مرة أخرى.');
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="checkout">
+      <div className="container">
+        <h1 className="checkout__title">{t.checkoutTitle}</h1>
+        <div className="checkout__layout">
+          <form onSubmit={handleSubmit} className="checkout__form" noValidate>
+            <div className="checkout__section">
+              <h2>{t.deliveryDetails}</h2>
+              <div className="form-group">
+                <label>{t.fullName} *</label>
+                <input type="text" value={form.name} onChange={(e) => set('name', e.target.value)} maxLength={80} placeholder="اسمك الكامل" />
+                {errors.name && <span className="error-msg">{errors.name}</span>}
+              </div>
+              <div className="form-group">
+                <label>{t.phone} *</label>
+                <input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="05xxxxxxxx" maxLength={15} dir="ltr" />
+                {errors.phone && <span className="error-msg">{errors.phone}</span>}
+              </div>
+              <div className="grid-2">
+                <div className="form-group">
+                  <label>{t.city} *</label>
+                  <input type="text" value={form.city} onChange={(e) => set('city', e.target.value)} maxLength={60} />
+                  {errors.city && <span className="error-msg">{errors.city}</span>}
+                </div>
+                <div className="form-group">
+                  <label>{t.district}</label>
+                  <input type="text" value={form.district} onChange={(e) => set('district', e.target.value)} maxLength={60} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>{t.street} *</label>
+                <input type="text" value={form.street} onChange={(e) => set('street', e.target.value)} maxLength={120} />
+                {errors.street && <span className="error-msg">{errors.street}</span>}
+              </div>
+              <div className="form-group">
+                <label>{t.notes}</label>
+                <textarea value={form.notes} onChange={(e) => set('notes', e.target.value)} rows={3} maxLength={300} placeholder={t.notesPlaceholder} />
+              </div>
+            </div>
+
+            <div className="checkout__section">
+              <h2>{t.paymentMethod}</h2>
+              {[
+                { val: 'cash_on_delivery', label: t.cashOnDelivery },
+                { val: 'card_on_delivery', label: t.cardOnDelivery },
+              ].map((pm) => (
+                <label key={pm.val} className="checkout__radio">
+                  <input type="radio" name="payment" value={pm.val}
+                    checked={form.payment === pm.val} onChange={() => set('payment', pm.val)} />
+                  {pm.label}
+                </label>
+              ))}
+            </div>
+
+            <button type="submit" className="btn btn-primary checkout__submit" disabled={submitting}>
+              {submitting ? t.placingOrder : `${t.placeOrder} — ${(subtotal + DELIVERY_FEE).toFixed(2)} ${t.sar}`}
+            </button>
+          </form>
+
+          <div className="checkout__summary">
+            <h2>{t.yourOrder}</h2>
+            {items.map((i) => (
+              <div key={i.id} className="checkout__item">
+                <img src={i.image_url} alt={i.name} />
+                <div>
+                  <p>{i.name_ar || i.name}</p>
+                  <small>×{i.quantity}</small>
+                </div>
+                <span>{(i.price * i.quantity).toFixed(2)} {t.sar}</span>
+              </div>
+            ))}
+            <div className="checkout__totals">
+              <div className="checkout__total-row"><span>{t.subtotal}</span><span>{subtotal.toFixed(2)} {t.sar}</span></div>
+              <div className="checkout__total-row"><span>{t.delivery}</span><span>{DELIVERY_FEE.toFixed(2)} {t.sar}</span></div>
+              <div className="checkout__total-row checkout__total-row--bold">
+                <strong>{t.total}</strong><strong>{(subtotal + DELIVERY_FEE).toFixed(2)} {t.sar}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

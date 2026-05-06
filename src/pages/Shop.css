@@ -1,0 +1,171 @@
+.shop__header {
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-bg));
+  padding: 3rem 0 2rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.shop__header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+}
+.shop__header p { color: var(--color-text-muted); margin-top: .25rem; }
+
+.shop__layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 2rem;
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+  align-items: start;
+}
+
+/* ---- Sidebar ---- */
+.shop__sidebar {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 88px;
+}
+.shop__sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.shop__sidebar-header h3 { font-weight: 700; color: var(--color-primary-dark); }
+.shop__sidebar-close { display: none; background: transparent; border: none; color: var(--color-text-muted); }
+
+.shop__filter-search {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 1.25rem;
+}
+.shop__filter-search input {
+  flex: 1;
+  padding: .5rem .75rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: .9rem;
+}
+.shop__filter-search input:focus {
+  outline: none;
+  border-color: var(--color-primary-dark);
+}
+.shop__filter-search button {
+  background: var(--color-primary-dark);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: .5rem .75rem;
+  display: flex;
+}
+
+.shop__filter-group h4 {
+  font-size: .85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--color-text-muted);
+  margin-bottom: .5rem;
+}
+.shop__filter-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: .45rem .6rem;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  font-size: .9rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background .15s;
+}
+.shop__filter-btn:hover { background: var(--color-primary-light); }
+.shop__filter-btn--active {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.shop__clear-filter {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin-top: 1rem;
+  font-size: .8rem;
+  color: var(--color-primary-dark);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ---- Main ---- */
+.shop__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+.shop__filter-toggle { display: none; }
+.shop__sort {
+  padding: .45rem .75rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: .9rem;
+  background: #fff;
+  color: var(--color-text);
+}
+
+.shop__empty {
+  text-align: center;
+  padding: 4rem 0;
+  color: var(--color-text-muted);
+}
+.shop__empty p { margin-bottom: 1.25rem; }
+
+/* ---- Pagination ---- */
+.shop__pagination {
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+  margin-top: 2rem;
+}
+.shop__page-btn {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--color-border);
+  background: #fff;
+  font-size: .9rem;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all .2s;
+}
+.shop__page-btn:hover { border-color: var(--color-primary-dark); }
+.shop__page-btn--active {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: #fff;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .shop__layout { grid-template-columns: 1fr; }
+  .shop__sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 280px;
+    z-index: 2000;
+    transform: translateX(-100%);
+    transition: transform .3s;
+    overflow-y: auto;
+    border-radius: 0;
+  }
+  .shop__sidebar--open { transform: translateX(0); }
+  .shop__sidebar-close { display: flex; }
+  .shop__filter-toggle { display: flex; }
+}

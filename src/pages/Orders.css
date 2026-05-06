@@ -1,0 +1,73 @@
+.orders { padding: 2rem 0 4rem; }
+.orders__title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  margin-bottom: 2rem;
+}
+.orders__list { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.order-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.order-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.order-card__id { font-weight: 700; font-size: .9rem; display: block; }
+.order-card__date { font-size: .8rem; color: var(--color-text-muted); }
+.order-card__status {
+  padding: .25rem .75rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+.order-card__items { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: .6rem; }
+.order-card__item {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  font-size: .9rem;
+}
+.order-card__item img {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.order-card__item span:nth-child(2) { flex: 1; font-weight: 600; }
+.order-card__item span:nth-child(3) { color: var(--color-text-muted); }
+.order-card__item span:last-child   { font-weight: 700; color: var(--color-primary-dark); }
+
+.order-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .75rem 1.25rem;
+  border-top: 1px solid var(--color-border);
+  font-size: .9rem;
+}
+.order-card__payment {
+  text-transform: capitalize;
+  color: var(--color-text-muted);
+  font-size: .82rem;
+}
+
+.orders-empty, .orders-login {
+  text-align: center;
+  padding: 5rem 0;
+}
+.orders-empty h2 { margin-bottom: .5rem; }
+.orders-empty p  { color: var(--color-text-muted); margin-bottom: 1.25rem; }
+.orders-login a  { color: var(--color-primary-dark); font-weight: 600; }
