@@ -160,6 +160,7 @@ export const ar = {
   // Admin
   dashboard: 'لوحة التحكم',
   products: 'المنتجات',
+  users: 'المستخدمين',
   totalOrders: 'إجمالي الطلبات',
   revenue: 'الإيرادات',
   addProduct: 'إضافة منتج',

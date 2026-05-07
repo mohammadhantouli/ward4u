@@ -64,22 +64,27 @@ export default function Home() {
   const fetchProducts = useCallback(async () => {
     if (isRateLimited('home-shop-fetch', 150, 60_000)) { setLoading(false); return; }
     setLoading(true);
-    let query = supabase
-      .from('products')
-      .select('*, categories(name, name_ar, slug)', { count: 'exact' })
-      .eq('is_active', true)
-      .order(sortField, { ascending: sortDir === 'asc' })
-      .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
-    if (q) query = query.ilike('name', `%${q}%`);
-    if (cat) {
-      const { data: catRow } = await supabase
-        .from('categories').select('id').eq('slug', cat).single();
-      if (catRow) query = query.eq('category_id', catRow.id);
+    try {
+      let query = supabase
+        .from('products')
+        .select('*, categories(name, name_ar, slug)', { count: 'exact' })
+        .eq('is_active', true)
+        .order(sortField, { ascending: sortDir === 'asc' })
+        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+      if (q) query = query.ilike('name', `%${q}%`);
+      if (cat) {
+        const { data: catRow } = await supabase
+          .from('categories').select('id').eq('slug', cat).single();
+        if (catRow) query = query.eq('category_id', catRow.id);
+      }
+      const { data, count } = await query;
+      setProducts(data || []);
+      setTotal(count || 0);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    } finally {
+      setLoading(false);
     }
-    const { data, count } = await query;
-    setProducts(data || []);
-    setTotal(count || 0);
-    setLoading(false);
   }, [q, cat, sort, page]);
 
   useEffect(() => { fetchProducts(); }, [fetchProducts]);

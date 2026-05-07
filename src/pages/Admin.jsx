@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { sanitizeText, isPositiveNumber, clampNumber, isRateLimited } from '../utils/security';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Package, ShoppingBag, Upload, TrendingUp, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Package, ShoppingBag, Upload, TrendingUp, X, Users } from 'lucide-react';
 import './Admin.css';
 
 const STATUS_OPTIONS = [
@@ -28,6 +28,7 @@ export default function Admin() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [users_list, setUsersList] = useState([]);
   const [form, setForm] = useState(EMPTY_PRODUCT);
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -44,6 +45,7 @@ export default function Admin() {
     if (tab === 'dashboard') loadStats();
     if (tab === 'products') { loadProducts(); loadCategories(); }
     if (tab === 'orders') loadOrders();
+    if (tab === 'users') loadUsers();
   }, [tab]);
 
   const loadStats = async () => {
@@ -72,6 +74,14 @@ export default function Admin() {
       .select('*, profiles(full_name, phone), order_items(product_name, quantity, price)')
       .order('created_at', { ascending: false });
     setOrders(data || []);
+  };
+
+  const loadUsers = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    setUsersList(data || []);
   };
 
   const handleImageUpload = async (file) => {
@@ -135,9 +145,20 @@ export default function Admin() {
   };
 
   const handleDeleteProduct = async (id) => {
-    if (!confirm('Delete this product?')) return;
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) toast.error('Delete failed'); else { toast.success('Deleted'); loadProducts(); }
+    if (!window.confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) {
+        console.error('Delete error:', error);
+        toast.error('فشل الحذف: ' + error.message);
+      } else {
+        toast.success('تم حذف المنتج بنجاح');
+        loadProducts();
+      }
+    } catch (err) {
+      console.error('Delete exception:', err);
+      toast.error('حدث خطأ غير متوقع');
+    }
   };
 
   const handleOrderStatus = async (id, status) => {
@@ -162,6 +183,7 @@ export default function Admin() {
           { key: 'dashboard', icon: <TrendingUp size={18} />, label: t.dashboard },
           { key: 'products', icon: <Package size={18} />, label: t.products },
           { key: 'orders', icon: <ShoppingBag size={18} />, label: t.orders },
+          { key: 'users', icon: <Users size={18} />, label: t.users },
         ].map((t) => (
           <button
             key={t.key}
@@ -361,6 +383,41 @@ export default function Admin() {
                         </select>
                       </td>
                       <td><small>{new Date(o.created_at).toLocaleDateString()}</small></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ---- Users ---- */}
+        {tab === 'users' && (
+          <div>
+            <h1>{t.users}</h1>
+            <div className="admin__table-wrap">
+              <table className="admin__table">
+                <thead>
+                  <tr>
+                    <th>{t.name}</th>
+                    <th>{t.email}</th>
+                    <th>{t.phone}</th>
+                    <th>{t.status}</th>
+                    <th>{t.date}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users_list.map((u) => (
+                    <tr key={u.id}>
+                      <td><strong>{u.full_name || '—'}</strong></td>
+                      <td>{u.email || '—'}</td>
+                      <td>{u.phone || '—'}</td>
+                      <td>
+                        <span className={`admin__status-dot ${u.role === 'admin' ? 'active' : 'inactive'}`}>
+                          {u.role === 'admin' ? 'مدير' : 'عميل'}
+                        </span>
+                      </td>
+                      <td><small>{new Date(u.created_at).toLocaleDateString()}</small></td>
                     </tr>
                   ))}
                 </tbody>

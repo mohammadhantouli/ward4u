@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE TABLE IF NOT EXISTS profiles (
   id         UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name  TEXT,
+  email      TEXT,
   phone      TEXT,
   avatar_url TEXT,
   role       TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin')),
@@ -282,12 +283,13 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name)
+  INSERT INTO public.profiles (id, full_name, email)
   VALUES (
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1))
+    COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
+    NEW.email
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email;
   RETURN NEW;
 END;
 $$;
@@ -378,3 +380,37 @@ INSERT INTO products (name, name_ar, slug, description, description_ar, price, o
    25, false, ARRAY['لافندر','بنفسجي','مجفف'])
 
 ON CONFLICT (slug) DO NOTHING;
+
+-- ============================================================
+-- STORAGE BUCKETS
+-- ============================================================
+-- Note: Run these in the Supabase SQL Editor if they don't apply automatically
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Policies for 'product-images' bucket
+-- 1. Allow everyone to view images
+CREATE POLICY "Public Read" ON storage.objects
+  FOR SELECT USING (bucket_id = 'product-images');
+
+-- 2. Allow admins to upload images
+CREATE POLICY "Admin Insert" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'product-images' AND
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- 3. Allow admins to update images
+CREATE POLICY "Admin Update" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'product-images' AND
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- 4. Allow admins to delete images
+CREATE POLICY "Admin Delete" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'product-images' AND
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );

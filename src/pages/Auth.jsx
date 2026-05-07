@@ -37,8 +37,15 @@ export default function Auth() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isRateLimited(`auth-${form.email}`, 5, 300_000)) {
-      toast.error('محاولات كثيرة جداً. انتظر 5 دقائق.');
+    
+    // Rate limiting: 3 attempts per 5 mins for registration, 5 for login
+    const rateLimitKey = mode === 'register' ? 'auth-reg-global' : `auth-login-${form.email.trim().toLowerCase()}`;
+    const maxAttempts = mode === 'register' ? 3 : 5;
+    
+    if (isRateLimited(rateLimitKey, maxAttempts, 300_000)) {
+      toast.error(mode === 'register' 
+        ? 'محاولات إنشاء حساب كثيرة جداً من هذا الجهاز. انتظر 5 دقائق.' 
+        : 'محاولات دخول كثيرة جداً. انتظر 5 دقائق.');
       return;
     }
     const errs = validate();

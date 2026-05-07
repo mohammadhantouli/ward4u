@@ -48,19 +48,32 @@ export function clampNumber(val, min, max) {
 }
 
 // Rate limiter — returns false if the action is allowed, true if rate-limited
-const rateLimitMap = new Map();
+// Uses localStorage for persistence across page refreshes for sensitive actions
 export function isRateLimited(key, maxCalls = 5, windowMs = 60_000) {
   const now = Date.now();
-  const record = rateLimitMap.get(key) || { count: 0, start: now };
+  const storageKey = `rl_${key}`;
+  let record;
 
+  try {
+    const stored = localStorage.getItem(storageKey);
+    record = stored ? JSON.parse(stored) : { count: 0, start: now };
+  } catch (e) {
+    record = { count: 0, start: now };
+  }
+
+  // Reset if window has passed
   if (now - record.start > windowMs) {
-    rateLimitMap.set(key, { count: 1, start: now });
+    const newRecord = { count: 1, start: now };
+    try { localStorage.setItem(storageKey, JSON.stringify(newRecord)); } catch (e) {}
     return false;
   }
+
+  // Check if limit reached
   if (record.count >= maxCalls) return true;
 
+  // Increment and save
   record.count += 1;
-  rateLimitMap.set(key, record);
+  try { localStorage.setItem(storageKey, JSON.stringify(record)); } catch (e) {}
   return false;
 }
 
