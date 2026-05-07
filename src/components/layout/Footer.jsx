@@ -7,9 +7,9 @@ import './Footer.css';
 function InstagramIcon() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
     </svg>
   );
 }
@@ -24,9 +24,9 @@ export default function Footer() {
             <img src={wardLogo} alt="Ward 4U" className="footer__logo-img" />
           </div>
           <p>{t.footerDesc}</p>
-          <div className="footer__socials">
+          {/* <div className="footer__socials">
             <a href="#" aria-label="Instagram" className="footer__social"><InstagramIcon /></a>
-          </div>
+          </div>*/}
         </div>
 
         <div className="footer__col">
@@ -48,14 +48,14 @@ export default function Footer() {
 
         <div className="footer__col">
           <h3>{t.contact}</h3>
-          <a href="tel:+966500000000" className="footer__contact-item">
-            <Phone size={15} /> 0500000000
+          <a href="tel:+972528997136" className="footer__contact-item">
+            <Phone size={15} /> 0528997136
           </a>
           <a href="mailto:hello@ward4u.com" className="footer__contact-item">
-            <Mail size={15} /> hello@ward4u.com
+            <Mail size={15} /> Waledbr@gmail.com
           </a>
           <span className="footer__contact-item">
-            <MapPin size={15} /> الرياض، المملكة العربية السعودية
+            <MapPin size={15} /> الناصره-الفاخوره
           </span>
         </div>
       </div>
