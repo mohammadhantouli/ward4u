@@ -121,3 +121,9 @@
   transform: none !important;
   box-shadow: none !important;
 }
+
+@media (max-width: 640px) {
+  .product-card__price {
+    font-size: 1.3rem;
+  }
+}

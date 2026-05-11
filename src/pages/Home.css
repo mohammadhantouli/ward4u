@@ -170,9 +170,29 @@
 ═══════════════════════════════════════ */
 @media (max-width: 900px) {
 
-  .hero__flowers,
-  .hero__slideshow {
+  .hero__flowers {
     display: none;
+  }
+
+  .hero__inner {
+    flex-direction: column;
+    padding: 2rem 0;
+    gap: 1.5rem;
+  }
+
+  .hero__content {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .hero__cta {
+    justify-content: center;
+  }
+
+  .hero__slideshow {
+    width: 100%;
+    max-width: 100%;
+    height: 260px;
   }
 
   .home-shop__layout {
