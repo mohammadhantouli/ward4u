@@ -144,16 +144,10 @@ export default function Checkout() {
 
             <div className="checkout__section">
               <h2>{t.paymentMethod}</h2>
-              {[
-                { val: 'cash_on_delivery', label: t.cashOnDelivery },
-                { val: 'card_on_delivery', label: t.cardOnDelivery },
-              ].map((pm) => (
-                <label key={pm.val} className="checkout__radio">
-                  <input type="radio" name="payment" value={pm.val}
-                    checked={form.payment === pm.val} onChange={() => set('payment', pm.val)} />
-                  {pm.label}
-                </label>
-              ))}
+              <label className="checkout__radio">
+                <input type="radio" name="payment" value="cash_on_delivery" checked readOnly />
+                {t.cashOnDelivery}
+              </label>
             </div>
 
             <button type="submit" className="btn btn-primary checkout__submit" disabled={submitting}>
