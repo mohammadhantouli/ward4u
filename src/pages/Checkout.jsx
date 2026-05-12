@@ -8,14 +8,17 @@ import { sanitizeText, isValidPhone, clampNumber, isRateLimited } from '../utils
 import toast from 'react-hot-toast';
 import './Checkout.css';
 
-const DELIVERY_FEE = 25;
+const getEffectivePrice = (item) =>
+  item.bulk_min_qty && item.bulk_discount_pct && item.quantity >= item.bulk_min_qty
+    ? item.price * (1 - item.bulk_discount_pct / 100)
+    : item.price;
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { t } = useLang();
   const { items, clearCart } = useCartStore();
-  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const subtotal = items.reduce((s, i) => s + getEffectivePrice(i) * i.quantity, 0);
 
   const [form, setForm] = useState({
     name: profile?.full_name || '',
@@ -68,8 +71,8 @@ export default function Checkout() {
         .from('orders')
         .insert({
           user_id: user.id,
-          total: subtotal + DELIVERY_FEE,
-          delivery_fee: DELIVERY_FEE,
+          total: subtotal,
+          delivery_fee: 0,
           delivery_address: deliveryAddress,
           payment_method: form.payment,
           notes: sanitizeText(form.notes),
@@ -83,7 +86,7 @@ export default function Checkout() {
         order_id:     order.id,
         product_id:   i.id,
         product_name: sanitizeText(i.name_ar || i.name),
-        price:        clampNumber(i.price, 0, 999999),
+        price:        clampNumber(getEffectivePrice(i), 0, 999999),
         quantity:     clampNumber(i.quantity, 1, 99),
         image_url:    i.image_url,
       }));
@@ -151,7 +154,7 @@ export default function Checkout() {
             </div>
 
             <button type="submit" className="btn btn-primary checkout__submit" disabled={submitting}>
-              {submitting ? t.placingOrder : `${t.placeOrder} — ${(subtotal + DELIVERY_FEE).toFixed(2)} ${t.sar}`}
+              {submitting ? t.placingOrder : `${t.placeOrder} — ${subtotal.toFixed(2)} ${t.sar}`}
             </button>
           </form>
 
@@ -164,15 +167,16 @@ export default function Checkout() {
                   <p>{i.name_ar || i.name}</p>
                   <small>×{i.quantity}</small>
                 </div>
-                <span>{(i.price * i.quantity).toFixed(2)} {t.sar}</span>
+                <span>{(getEffectivePrice(i) * i.quantity).toFixed(2)} {t.sar}</span>
               </div>
             ))}
             <div className="checkout__totals">
               <div className="checkout__total-row"><span>{t.subtotal}</span><span>{subtotal.toFixed(2)} {t.sar}</span></div>
-              <div className="checkout__total-row"><span>{t.delivery}</span><span>{DELIVERY_FEE.toFixed(2)} {t.sar}</span></div>
+              <div className="checkout__total-row"><span>{t.delivery}</span><span style={{ fontSize: '.85rem', color: 'var(--color-text-muted)' }}>يعتمد على المكان</span></div>
               <div className="checkout__total-row checkout__total-row--bold">
-                <strong>{t.total}</strong><strong>{(subtotal + DELIVERY_FEE).toFixed(2)} {t.sar}</strong>
+                <strong>{t.total}</strong><strong>{subtotal.toFixed(2)} {t.sar}</strong>
               </div>
+              <p style={{ fontSize: '.78rem', color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '.25rem' }}>لا يشمل رسوم التوصيل</p>
             </div>
           </div>
         </div>

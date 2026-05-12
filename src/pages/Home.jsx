@@ -8,9 +8,8 @@ import ProductCard from '../components/ui/ProductCard';
 import './Home.css';
 import './Shop.css';
 
-/* ── Hero slideshow images ── */
-/* To use your own photos: put them in public/hero/ and use '/hero/filename.jpg' */
-const HERO_IMAGES = [
+/* ── Hero slideshow images (fallback if storage is empty) ── */
+const FALLBACK_IMAGES = [
   '/hero/1.JPEG',
   '/hero/2.JPEG',
   '/hero/3.JPEG',
@@ -25,13 +24,26 @@ export default function Home() {
   const { t } = useLang();
 
   /* ── Slideshow ── */
+  const [heroImages, setHeroImages] = useState(FALLBACK_IMAGES);
   const [slide, setSlide] = useState(0);
   const timerRef = useRef(null);
+
+  useEffect(() => {
+    supabase.storage.from('hero-images').list('', { sortBy: { column: 'name', order: 'asc' } })
+      .then(({ data }) => {
+        if (data) {
+          const urls = data
+            .filter((f) => f.name !== '.emptyFolderPlaceholder')
+            .map((f) => supabase.storage.from('hero-images').getPublicUrl(f.name).data.publicUrl);
+          if (urls.length > 0) setHeroImages(urls);
+        }
+      });
+  }, []);
 
   const startTimer = useCallback(() => {
     clearInterval(timerRef.current);
     timerRef.current = setInterval(
-      () => setSlide((s) => (s + 1) % HERO_IMAGES.length),
+      () => setSlide((s) => (s + 1) % heroImages.length),
       SLIDE_INTERVAL
     );
   }, []);
@@ -131,7 +143,7 @@ export default function Home() {
 
           {/* Right: slideshow */}
           <div className="hero__slideshow">
-            {HERO_IMAGES.map((src, i) => (
+            {heroImages.map((src, i) => (
               <img
                 key={i}
                 src={src}
@@ -141,11 +153,11 @@ export default function Home() {
             ))}
             {/* Slide number e.g. ٢ / ٥ */}
             <div className="hero__slide-counter">
-              {slide + 1} / {HERO_IMAGES.length}
+              {slide + 1} / {heroImages.length}
             </div>
             {/* Dots */}
             <div className="hero__dots">
-              {HERO_IMAGES.map((_, i) => (
+              {heroImages.map((_, i) => (
                 <button
                   key={i}
                   className={`hero__dot ${i === slide ? 'hero__dot--active' : ''}`}

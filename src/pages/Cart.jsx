@@ -4,13 +4,15 @@ import { useCartStore } from '../store/cartStore';
 import { useLang } from '../context/LangContext';
 import './Cart.css';
 
-const DELIVERY_FEE = 25;
+const getEffectivePrice = (item) =>
+  item.bulk_min_qty && item.bulk_discount_pct && item.quantity >= item.bulk_min_qty
+    ? item.price * (1 - item.bulk_discount_pct / 100)
+    : item.price;
 
 export default function Cart() {
   const { t } = useLang();
   const { items, removeItem, updateQuantity } = useCartStore();
-  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal + (items.length ? DELIVERY_FEE : 0);
+  const subtotal = items.reduce((s, i) => s + getEffectivePrice(i) * i.quantity, 0);
 
   if (items.length === 0) {
     return (
@@ -34,7 +36,20 @@ export default function Cart() {
                 <img src={item.image_url} alt={item.name} className="cart-item__img" />
                 <div className="cart-item__info">
                   <h3>{item.name_ar || item.name}</h3>
-                  <p className="cart-item__price">{item.price.toFixed(2)} {t.sar}</p>
+                  {item.bulk_min_qty && item.bulk_discount_pct && item.quantity >= item.bulk_min_qty ? (
+                    <p className="cart-item__price">
+                      <span style={{ textDecoration: 'line-through', color: 'var(--color-text-muted)', fontSize: '.85rem', marginLeft: '.3rem' }}>{item.price.toFixed(2)}</span>
+                      <span style={{ color: 'var(--color-secondary)', fontWeight: 700 }}>{getEffectivePrice(item).toFixed(2)} {t.sar}</span>
+                      <span className="cart-item__bulk-badge">خصم {item.bulk_discount_pct}%</span>
+                    </p>
+                  ) : (
+                    <p className="cart-item__price">
+                      {item.price.toFixed(2)} {t.sar}
+                      {item.bulk_min_qty && item.bulk_discount_pct && (
+                        <span className="cart-item__bulk-hint">أضف {item.bulk_min_qty - item.quantity} أكثر لخصم {item.bulk_discount_pct}%</span>
+                      )}
+                    </p>
+                  )}
                 </div>
                 <div className="cart-item__qty">
                   <button onClick={() => item.quantity > 1 ? updateQuantity(item.id, item.quantity - 1) : removeItem(item.id)}>
@@ -45,7 +60,7 @@ export default function Cart() {
                     <Plus size={14} />
                   </button>
                 </div>
-                <span className="cart-item__subtotal">{(item.price * item.quantity).toFixed(2)} {t.sar}</span>
+                <span className="cart-item__subtotal">{(getEffectivePrice(item) * item.quantity).toFixed(2)} {t.sar}</span>
                 <button className="cart-item__remove" onClick={() => removeItem(item.id)} aria-label="حذف">
                   <Trash2 size={16} />
                 </button>
@@ -59,11 +74,12 @@ export default function Cart() {
               <span>{t.subtotal}</span><span>{subtotal.toFixed(2)} {t.sar}</span>
             </div>
             <div className="cart__summary-row">
-              <span>{t.delivery}</span><span>{DELIVERY_FEE.toFixed(2)} {t.sar}</span>
+              <span>{t.delivery}</span><span style={{ fontSize: '.85rem', color: 'var(--color-text-muted)' }}>يعتمد على المكان</span>
             </div>
             <div className="cart__summary-row cart__summary-total">
-              <strong>{t.total}</strong><strong>{total.toFixed(2)} {t.sar}</strong>
+              <strong>{t.total}</strong><strong>{subtotal.toFixed(2)} {t.sar}</strong>
             </div>
+            <p style={{ fontSize: '.78rem', color: 'var(--color-text-muted)', textAlign: 'center', marginTop: '.25rem' }}>لا يشمل رسوم التوصيل</p>
             <Link to="/checkout" className="btn btn-primary cart__checkout-btn">{t.checkout}</Link>
             <Link to="/shop" className="btn btn-outline cart__continue-btn">{t.continueShopping}</Link>
           </div>

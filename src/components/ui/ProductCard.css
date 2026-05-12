@@ -122,6 +122,13 @@
   box-shadow: none !important;
 }
 
+.product-card__bulk {
+  font-size: .75rem;
+  color: var(--color-secondary);
+  font-weight: 700;
+  margin-top: .2rem;
+}
+
 @media (max-width: 640px) {
   .product-card__price {
     font-size: 1.3rem;

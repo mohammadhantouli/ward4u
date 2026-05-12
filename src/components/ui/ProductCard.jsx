@@ -68,6 +68,9 @@ export default function ProductCard({ product }) {
             <span className="product-card__original">{product.original_price.toFixed(2)} {t.sar}</span>
           )}
         </div>
+        {product.bulk_min_qty && product.bulk_discount_pct && (
+          <p className="product-card__bulk">خصم {product.bulk_discount_pct}% عند شراء {product.bulk_min_qty}+</p>
+        )}
 
         <button
           className={`btn btn-primary product-card__btn ${adding ? 'product-card__btn--adding' : ''}`}

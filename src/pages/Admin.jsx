@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { sanitizeText, isPositiveNumber, clampNumber, isRateLimited } from '../utils/security';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Package, ShoppingBag, Upload, TrendingUp, X, Users } from 'lucide-react';
+import { Plus, Edit2, Trash2, Package, ShoppingBag, Upload, TrendingUp, X, Users, Settings, Image } from 'lucide-react';
 import './Admin.css';
 
 const STATUS_OPTIONS = [
@@ -16,7 +16,7 @@ const STATUS_OPTIONS = [
   { value: 'delivered', label: 'تم التوصيل' },
   { value: 'cancelled', label: 'ملغى' },
 ];
-const EMPTY_PRODUCT = { name: '', slug: '', description: '', price: '', original_price: '', stock: '', image_url: '', is_featured: false, is_active: true, category_id: '' };
+const EMPTY_PRODUCT = { name: '', slug: '', description: '', price: '', original_price: '', stock: '', image_url: '', is_featured: false, is_active: true, category_id: '', bulk_min_qty: '', bulk_discount_pct: '' };
 
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
@@ -36,7 +36,10 @@ export default function Admin() {
   const [savingProd, setSavingProd] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [useUrlFallback, setUseUrlFallback] = useState(false);
+  const [heroImages, setHeroImages] = useState([]);
+  const [heroUploading, setHeroUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const heroFileInputRef = useRef(null);
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) navigate('/');
@@ -47,6 +50,7 @@ export default function Admin() {
     if (tab === 'products') { loadProducts(); loadCategories(); }
     if (tab === 'orders') loadOrders();
     if (tab === 'users') loadUsers();
+    if (tab === 'settings') loadHeroImages();
   }, [tab]);
 
   const loadStats = async () => {
@@ -83,6 +87,43 @@ export default function Admin() {
       .select('*')
       .order('created_at', { ascending: false });
     setUsersList(data || []);
+  };
+
+  const loadHeroImages = async () => {
+    const { data } = await supabase.storage
+      .from('hero-images')
+      .list('', { sortBy: { column: 'name', order: 'asc' } });
+    if (data) {
+      setHeroImages(
+        data
+          .filter((f) => f.name !== '.emptyFolderPlaceholder')
+          .map((f) => ({
+            name: f.name,
+            url: supabase.storage.from('hero-images').getPublicUrl(f.name).data.publicUrl,
+          }))
+      );
+    }
+  };
+
+  const deleteHeroImage = async (name) => {
+    const { error } = await supabase.storage.from('hero-images').remove([name]);
+    if (error) toast.error('فشل الحذف');
+    else { toast.success('تم حذف الصورة'); loadHeroImages(); }
+  };
+
+  const handleHeroUpload = async (file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error('الصورة أكبر من 5 ميغابايت'); return; }
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) { toast.error('نوع ملف غير مدعوم'); return; }
+    setHeroUploading(true);
+    const fileName = `hero-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage
+      .from('hero-images')
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+    if (error) toast.error('فشل الرفع: ' + error.message);
+    else { toast.success('تم رفع الصورة ✓'); loadHeroImages(); }
+    setHeroUploading(false);
   };
 
   const handleImageUpload = async (file) => {
@@ -129,6 +170,8 @@ export default function Admin() {
       is_featured: !!form.is_featured,
       is_active: !!form.is_active,
       category_id: form.category_id || null,
+      bulk_min_qty: form.bulk_min_qty ? parseInt(form.bulk_min_qty, 10) : null,
+      bulk_discount_pct: form.bulk_discount_pct ? parseFloat(form.bulk_discount_pct) : null,
     };
 
     setSavingProd(true);
@@ -169,7 +212,14 @@ export default function Admin() {
 
   const startEdit = (p) => {
     setEditId(p.id);
-    setForm({ ...p, price: String(p.price), original_price: p.original_price ? String(p.original_price) : '', stock: String(p.stock) });
+    setForm({
+      ...p,
+      price: String(p.price),
+      original_price: p.original_price ? String(p.original_price) : '',
+      stock: String(p.stock),
+      bulk_min_qty: p.bulk_min_qty ? String(p.bulk_min_qty) : '',
+      bulk_discount_pct: p.bulk_discount_pct ? String(p.bulk_discount_pct) : '',
+    });
     setShowForm(true);
   };
 
@@ -185,6 +235,7 @@ export default function Admin() {
           { key: 'products', icon: <Package size={18} />, label: t.products },
           { key: 'orders', icon: <ShoppingBag size={18} />, label: t.orders },
           { key: 'users', icon: <Users size={18} />, label: t.users },
+          { key: 'settings', icon: <Settings size={18} />, label: 'الإعدادات' },
         ].map((t) => (
           <button
             key={t.key}
@@ -320,6 +371,26 @@ export default function Admin() {
                     <option value="">-- بدون --</option>
                     {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
+                </div>
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label>الحد الأدنى للكمية (خصم الكميات)</label>
+                    <input
+                      type="number" min="2" step="1"
+                      value={form.bulk_min_qty}
+                      onChange={(e) => setForm(f => ({ ...f, bulk_min_qty: e.target.value }))}
+                      placeholder="مثال: 6"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>نسبة الخصم % (عند بلوغ الحد)</label>
+                    <input
+                      type="number" min="1" max="99" step="0.5"
+                      value={form.bulk_discount_pct}
+                      onChange={(e) => setForm(f => ({ ...f, bulk_discount_pct: e.target.value }))}
+                      placeholder="مثال: 10"
+                    />
+                  </div>
                 </div>
                 <div className="admin__checkboxes">
                   <label><input type="checkbox" checked={form.is_featured} onChange={(e) => setForm(f => ({ ...f, is_featured: e.target.checked }))} /> {t.featured}</label>
@@ -466,6 +537,52 @@ export default function Admin() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* ---- Settings ---- */}
+        {tab === 'settings' && (
+          <div>
+            <h1>الإعدادات</h1>
+            <div className="admin__settings-section">
+              <h2><Image size={18} /> صور السلايد (الصفحة الرئيسية)</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '.88rem', marginBottom: '1rem' }}>
+                الصور تُعرض بالترتيب الأبجدي. الحد الأقصى 5 ميغابايت للصورة.
+              </p>
+              <input
+                ref={heroFileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => handleHeroUpload(e.target.files[0])}
+              />
+              <button
+                className="btn btn-primary"
+                onClick={() => heroFileInputRef.current?.click()}
+                disabled={heroUploading}
+                style={{ marginBottom: '1.5rem' }}
+              >
+                {heroUploading ? <><div className="spinner spinner--sm" /> جارٍ الرفع...</> : <><Upload size={16} /> رفع صورة جديدة</>}
+              </button>
+              <div className="admin__hero-grid">
+                {heroImages.length === 0 && (
+                  <p style={{ color: 'var(--color-text-muted)' }}>لا توجد صور. ارفع صورة للبدء.</p>
+                )}
+                {heroImages.map((img) => (
+                  <div key={img.name} className="admin__hero-item">
+                    <img src={img.url} alt={img.name} />
+                    <button
+                      className="admin__hero-delete"
+                      onClick={() => deleteHeroImage(img.name)}
+                      title="حذف"
+                    >
+                      <X size={14} />
+                    </button>
+                    <span className="admin__hero-name">{img.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
