@@ -29,6 +29,7 @@ export default function Admin() {
   const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
   const [users_list, setUsersList] = useState([]);
+  const [expandedOrder, setExpandedOrder] = useState(null);
   const [form, setForm] = useState(EMPTY_PRODUCT);
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -364,27 +365,70 @@ export default function Admin() {
             <div className="admin__table-wrap">
               <table className="admin__table">
                 <thead>
-                  <tr><th>#</th><th>{t.customer}</th><th>{t.items}</th><th>{t.total}</th><th>{t.status}</th><th>{t.date}</th></tr>
+                  <tr><th>#</th><th>{t.customer}</th><th>الهاتف</th><th>{t.items}</th><th>{t.total}</th><th>{t.status}</th><th>{t.date}</th><th></th></tr>
                 </thead>
                 <tbody>
-                  {orders.map((o) => (
-                    <tr key={o.id}>
-                      <td><small>#{o.id.slice(-8).toUpperCase()}</small></td>
-                      <td>{o.profiles?.full_name || 'زائر'}</td>
-                      <td>{o.order_items?.length || 0} {t.items}</td>
-                      <td><strong>{o.total} {t.sar}</strong></td>
-                      <td>
-                        <select
-                          value={o.status}
-                          onChange={(e) => handleOrderStatus(o.id, e.target.value)}
-                          className="admin__status-select"
-                        >
-                          {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                        </select>
-                      </td>
-                      <td><small>{new Date(o.created_at).toLocaleDateString()}</small></td>
-                    </tr>
-                  ))}
+                  {orders.map((o) => {
+                    const addr = o.delivery_address || {};
+                    const isExpanded = expandedOrder === o.id;
+                    return (
+                      <>
+                        <tr key={o.id}>
+                          <td><small>#{o.id.slice(-8).toUpperCase()}</small></td>
+                          <td>{addr.name || o.profiles?.full_name || 'زائر'}</td>
+                          <td><a href={`tel:${addr.phone}`} style={{ color: 'var(--color-primary-dark)', fontWeight: 600 }}>{addr.phone || '—'}</a></td>
+                          <td>{o.order_items?.length || 0} {t.items}</td>
+                          <td><strong>{o.total} {t.sar}</strong></td>
+                          <td>
+                            <select
+                              value={o.status}
+                              onChange={(e) => handleOrderStatus(o.id, e.target.value)}
+                              className="admin__status-select"
+                            >
+                              {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                            </select>
+                          </td>
+                          <td><small>{new Date(o.created_at).toLocaleDateString()}</small></td>
+                          <td>
+                            <button
+                              className="admin__action-btn"
+                              onClick={() => setExpandedOrder(isExpanded ? null : o.id)}
+                              title="تفاصيل الطلب"
+                            >
+                              {isExpanded ? '▲' : '▼'}
+                            </button>
+                          </td>
+                        </tr>
+                        {isExpanded && (
+                          <tr key={`${o.id}-details`} className="admin__order-details-row">
+                            <td colSpan={8}>
+                              <div className="admin__order-details">
+                                <div className="admin__order-details-section">
+                                  <strong>📍 عنوان التوصيل</strong>
+                                  <p>{[addr.city, addr.district, addr.street].filter(Boolean).join(' — ') || '—'}</p>
+                                  {addr.notes && <p style={{ color: 'var(--color-text-muted)', fontSize: '.85rem' }}>ملاحظات: {addr.notes}</p>}
+                                </div>
+                                <div className="admin__order-details-section">
+                                  <strong>🛍️ المنتجات</strong>
+                                  {o.order_items?.map((item, i) => (
+                                    <div key={i} className="admin__order-item-row">
+                                      <span>{item.product_name}</span>
+                                      <span>×{item.quantity}</span>
+                                      <span>{(item.price * item.quantity).toFixed(2)} {t.sar}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="admin__order-details-section">
+                                  <strong>💳 الدفع</strong>
+                                  <p>{o.payment_method === 'cash_on_delivery' ? 'كاش عند الاستلام' : 'بطاقة عند الاستلام'}</p>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -287,6 +287,64 @@
   border-width: 2px;
 }
 
+/* ---- Order details expanded row ---- */
+.admin__order-details-row td {
+  padding: 0 !important;
+  background: #fdf6f0;
+  border-bottom: 2px solid var(--color-primary-light);
+}
+
+.admin__order-details {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.admin__order-details-section {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  min-width: 180px;
+}
+
+.admin__order-details-section strong {
+  font-size: .85rem;
+  color: var(--color-primary-dark);
+  margin-bottom: .2rem;
+}
+
+.admin__order-details-section p {
+  font-size: .9rem;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.admin__order-item-row {
+  display: flex;
+  gap: 1rem;
+  font-size: .88rem;
+  padding: .2rem 0;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.admin__order-item-row span:first-child {
+  flex: 1;
+  color: var(--color-text);
+}
+
+.admin__order-item-row span:nth-child(2) {
+  color: var(--color-text-muted);
+  min-width: 30px;
+}
+
+.admin__order-item-row span:last-child {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  min-width: 80px;
+  text-align: left;
+}
+
 @media (max-width: 768px) {
   .admin {
     grid-template-columns: 1fr;
