@@ -13,6 +13,40 @@ const getEffectivePrice = (item) =>
     ? item.price * (1 - item.bulk_discount_pct / 100)
     : item.price;
 
+const sendWhatsAppNotification = async (order, address, orderItems) => {
+  const instance = import.meta.env.VITE_GREENAPI_INSTANCE;
+  const token = import.meta.env.VITE_GREENAPI_TOKEN;
+  const ownerPhone = import.meta.env.VITE_OWNER_WHATSAPP;
+  if (!instance || !token || !ownerPhone) return;
+
+  const itemLines = orderItems
+    .map((i) => `• ${i.product_name} ×${i.quantity} — ${(i.price * i.quantity).toFixed(2)} ر.س`)
+    .join('\n');
+
+  const message =
+    `🌸 طلب جديد #${order.id.slice(0, 8)}\n\n` +
+    `👤 الاسم: ${address.name}\n` +
+    `📞 الجوال: ${address.phone}\n` +
+    `📍 العنوان: ${address.city}${address.district ? '، ' + address.district : ''}، ${address.street}\n` +
+    (address.notes ? `📝 ملاحظات: ${address.notes}\n` : '') +
+    `\n🛒 المنتجات:\n${itemLines}\n\n` +
+    `💰 الإجمالي: ${order.total.toFixed(2)} ر.س\n` +
+    `💳 الدفع: عند الاستلام`;
+
+  try {
+    await fetch(
+      `https://api.green-api.com/waInstance${instance}/sendMessage/${token}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId: `${ownerPhone}@c.us`, message }),
+      }
+    );
+  } catch (_) {
+    // Notification failure is non-critical
+  }
+};
+
 export default function Checkout() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -95,6 +129,7 @@ export default function Checkout() {
       if (itemsErr) throw itemsErr;
 
       clearCart();
+      sendWhatsAppNotification(order, deliveryAddress, orderItems);
       toast.success('تم تأكيد طلبك بنجاح!');
       navigate('/orders');
     } catch (err) {
