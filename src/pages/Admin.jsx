@@ -76,7 +76,7 @@ export default function Admin() {
   const loadOrders = async () => {
     const { data } = await supabase
       .from('orders')
-      .select('*, profiles(full_name, phone), order_items(product_name, quantity, price)')
+      .select('*, profiles(full_name, phone), order_items(product_name, quantity, price, image_url)')
       .order('created_at', { ascending: false });
     setOrders(data || []);
   };
@@ -483,6 +483,9 @@ export default function Admin() {
                                   <strong>🛍️ المنتجات</strong>
                                   {o.order_items?.map((item, i) => (
                                     <div key={i} className="admin__order-item-row">
+                                      {item.image_url && (
+                                        <img src={item.image_url} alt={item.product_name} className="admin__order-item-img" />
+                                      )}
                                       <span>{item.product_name}</span>
                                       <span>×{item.quantity}</span>
                                       <span>{(item.price * item.quantity).toFixed(2)} {t.sar}</span>

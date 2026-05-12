@@ -393,17 +393,25 @@
   border-bottom: 1px dashed var(--color-border);
 }
 
-.admin__order-item-row span:first-child {
+.admin__order-item-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.admin__order-item-row span:first-of-type {
   flex: 1;
   color: var(--color-text);
 }
 
-.admin__order-item-row span:nth-child(2) {
+.admin__order-item-row span:nth-of-type(2) {
   color: var(--color-text-muted);
   min-width: 30px;
 }
 
-.admin__order-item-row span:last-child {
+.admin__order-item-row span:last-of-type {
   font-weight: 700;
   color: var(--color-primary-dark);
   min-width: 80px;
