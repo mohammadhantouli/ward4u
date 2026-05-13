@@ -94,9 +94,14 @@
   margin-top: auto;
 }
 .product-card__price {
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  color: var(--color-primary-dark);
+  color: #2D2D2D;
+  background: var(--color-primary-light);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: .2rem .65rem;
+  display: inline-block;
 }
 .product-card__original {
   font-size: .82rem;
@@ -131,6 +136,6 @@
 
 @media (max-width: 640px) {
   .product-card__price {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
   }
 }

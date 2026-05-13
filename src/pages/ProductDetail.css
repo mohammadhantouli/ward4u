@@ -115,7 +115,16 @@
 .pd__stars  { color: var(--color-accent); font-size: 1.1rem; }
 
 .pd__price-row { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; }
-.pd__price    { font-size: 1.6rem; font-weight: 800; color: var(--color-primary-dark); }
+.pd__price {
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #2D2D2D;
+  background: var(--color-primary-light);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: .3rem .9rem;
+  display: inline-block;
+}
 .pd__original { font-size: 1rem; color: var(--color-text-muted); text-decoration: line-through; }
 
 .pd__desc { color: var(--color-text-muted); line-height: 1.8; margin-bottom: 1rem; }
