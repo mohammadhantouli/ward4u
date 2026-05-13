@@ -39,27 +39,20 @@ const sendWhatsAppNotification = async (order, address, orderItems) => {
   const firstImage = orderItems.find((i) => i.image_url)?.image_url;
 
   try {
-    let res;
     if (firstImage) {
-      res = await fetch(`${base}/sendFileByUrl/${token}`, {
+      // Send image first (no caption to avoid 1024-char limit)
+      await fetch(`${base}/sendFileByUrl/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatId, urlFile: firstImage, fileName: 'order.jpg', caption }),
-      });
-      if (!res.ok) {
-        res = await fetch(`${base}/sendMessage/${token}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chatId, message: caption }),
-        });
-      }
-    } else {
-      res = await fetch(`${base}/sendMessage/${token}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatId, message: caption }),
+        body: JSON.stringify({ chatId, urlFile: firstImage, fileName: 'order.jpg', caption: '🌸 طلب جديد' }),
       });
     }
+    // Send full details as separate text message
+    const res = await fetch(`${base}/sendMessage/${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatId, message: caption }),
+    });
     if (!res.ok) {
       const errBody = await res.text();
       console.error('[WhatsApp] send failed:', res.status, errBody);
