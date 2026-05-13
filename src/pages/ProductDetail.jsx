@@ -17,9 +17,11 @@ export default function ProductDetail() {
   const addItem = useCartStore((s) => s.addItem);
 
   const [product, setProduct] = useState(null);
+  const [productNumber, setProductNumber] = useState(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty]         = useState(1);
   const [activeImg, setActiveImg] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -48,6 +50,14 @@ export default function ProductDetail() {
         const newCount = (data.view_count || 0) + 1;
         await supabase.from('products').update({ view_count: newCount }).eq('id', data.id);
         setProduct((p) => ({ ...p, view_count: newCount }));
+
+        // Get sequential product number
+        const { count } = await supabase
+          .from('products')
+          .select('*', { count: 'exact', head: true })
+          .lte('created_at', data.created_at)
+          .eq('is_active', true);
+        setProductNumber(count || 1);
       }
     };
     load();
@@ -109,8 +119,9 @@ export default function ProductDetail() {
         <div className="pd__grid">
           {/* Images */}
           <div className="pd__images">
-            <div className="pd__main-img">
+            <div className="pd__main-img" onClick={() => setLightbox(true)}>
               <img src={allImages[activeImg]} alt={product.name_ar || product.name} />
+              <span className="pd__zoom-hint">🔍</span>
             </div>
             {allImages.length > 1 && (
               <div className="pd__thumbnails">
@@ -132,6 +143,9 @@ export default function ProductDetail() {
                 {product.categories?.name_ar || product.categories?.name}
               </Link>
             </p>
+            <div className="pd__meta-row">
+              {productNumber && <span className="pd__number">#{productNumber}</span>}
+            </div>
             <h1 className="pd__name">{product.name_ar || product.name}</h1>
             {product.view_count > 0 && (
               <p className="pd__views">👁 {product.view_count.toLocaleString('ar-EG')} مشاهدة</p>
@@ -233,6 +247,13 @@ export default function ProductDetail() {
             )}
         </div>
       </div>
+
+      {lightbox && (
+        <div className="pd__lightbox" onClick={() => setLightbox(false)}>
+          <img src={allImages[activeImg]} alt={product.name_ar || product.name} onClick={(e) => e.stopPropagation()} />
+          <button className="pd__lightbox-close" onClick={() => setLightbox(false)}>✕</button>
+        </div>
+      )}
     </div>
   );
 }
