@@ -19,6 +19,7 @@ export default function Orders() {
   const { t } = useLang();
   const [orders, setOrders]   = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lightbox, setLightbox] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -71,7 +72,14 @@ export default function Orders() {
                 <div className="order-card__items">
                   {order.order_items?.map((item, i) => (
                     <div key={i} className="order-card__item">
-                      {item.image_url && <img src={item.image_url} alt={item.product_name} />}
+                      {item.image_url && (
+                        <img
+                          src={item.image_url}
+                          alt={item.product_name}
+                          onClick={() => setLightbox(item.image_url)}
+                          className="order-card__item-img"
+                        />
+                      )}
                       <span>{item.product_name}</span>
                       <span>×{item.quantity}</span>
                       <span>{(item.price * item.quantity).toFixed(2)} {t.sar}</span>
@@ -90,6 +98,13 @@ export default function Orders() {
           })}
         </div>
       </div>
+
+      {lightbox && (
+        <div className="orders__lightbox" onClick={() => setLightbox(null)}>
+          <img src={lightbox} alt="معاينة" onClick={(e) => e.stopPropagation()} />
+          <button className="orders__lightbox-close" onClick={() => setLightbox(null)}>✕</button>
+        </div>
+      )}
     </div>
   );
 }

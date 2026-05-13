@@ -40,12 +40,47 @@
   gap: .75rem;
   font-size: .9rem;
 }
-.order-card__item img {
+.order-card__item img,
+.order-card__item-img {
   width: 44px; height: 44px;
   border-radius: var(--radius-sm);
   object-fit: cover;
   flex-shrink: 0;
+  cursor: zoom-in;
+  transition: opacity .2s;
 }
+.order-card__item-img:hover { opacity: .8; }
+
+.orders__lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.88);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.orders__lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 48px rgba(0,0,0,.6);
+}
+.orders__lightbox-close {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  background: rgba(255,255,255,.15);
+  border: none;
+  color: #fff;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.orders__lightbox-close:hover { background: rgba(255,255,255,.3); }
 .order-card__item span:nth-child(2) { flex: 1; font-weight: 600; }
 .order-card__item span:nth-child(3) { color: var(--color-text-muted); }
 .order-card__item span:last-child   { font-weight: 700; color: var(--color-primary-dark); }
