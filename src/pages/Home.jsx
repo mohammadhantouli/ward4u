@@ -135,9 +135,6 @@ export default function Home() {
               <Link to="/shop" className="btn btn-primary hero__btn">
                 {t.shopNow} <ArrowLeft size={18} />
               </Link>
-              <Link to="/shop?cat=wedding" className="btn btn-outline hero__btn">
-                {t.weddingCollection}
-              </Link>
             </div>
           </div>
 
