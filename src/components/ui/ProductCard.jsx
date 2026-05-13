@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
@@ -14,6 +14,17 @@ export default function ProductCard({ product }) {
   const { t } = useLang();
   const [wishlisted, setWishlisted] = useState(false);
   const [adding, setAdding]         = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('wishlist')
+      .select('product_id')
+      .eq('user_id', user.id)
+      .eq('product_id', product.id)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setWishlisted(true); });
+  }, [user, product.id]);
 
   const discount = product.original_price
     ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
@@ -37,7 +48,7 @@ export default function ProductCard({ product }) {
       await supabase.from('wishlist').delete().match({ user_id: user.id, product_id: product.id });
       setWishlisted(false);
     } else {
-      await supabase.from('wishlist').insert({ user_id: user.id, product_id: product.id });
+      await supabase.from('wishlist').upsert({ user_id: user.id, product_id: product.id }, { onConflict: 'user_id,product_id' });
       setWishlisted(true);
       toast.success('أُضيف إلى المفضلة!');
     }
