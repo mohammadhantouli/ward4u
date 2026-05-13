@@ -43,6 +43,11 @@ export default function ProductDetail() {
           .eq('product_id', data.id)
           .order('created_at', { ascending: false });
         setReviews(revs || []);
+
+        // Increment view counter
+        const newCount = (data.view_count || 0) + 1;
+        await supabase.from('products').update({ view_count: newCount }).eq('id', data.id);
+        setProduct((p) => ({ ...p, view_count: newCount }));
       }
     };
     load();
@@ -128,6 +133,9 @@ export default function ProductDetail() {
               </Link>
             </p>
             <h1 className="pd__name">{product.name_ar || product.name}</h1>
+            {product.view_count > 0 && (
+              <p className="pd__views">👁 {product.view_count.toLocaleString('ar-EG')} مشاهدة</p>
+            )}
 
             {avgRating && (
               <div className="pd__rating">
