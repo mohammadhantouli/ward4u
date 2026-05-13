@@ -39,26 +39,33 @@ const sendWhatsAppNotification = async (order, address, orderItems) => {
   const firstImage = orderItems.find((i) => i.image_url)?.image_url;
 
   try {
+    let res;
     if (firstImage) {
-      await fetch(`${base}/sendFileByUrl/${token}`, {
+      res = await fetch(`${base}/sendFileByUrl/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chatId,
-          urlFile: firstImage,
-          fileName: 'order.jpg',
-          caption,
-        }),
+        body: JSON.stringify({ chatId, urlFile: firstImage, fileName: 'order.jpg', caption }),
       });
+      if (!res.ok) {
+        res = await fetch(`${base}/sendMessage/${token}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatId, message: caption }),
+        });
+      }
     } else {
-      await fetch(`${base}/sendMessage/${token}`, {
+      res = await fetch(`${base}/sendMessage/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chatId, message: caption }),
       });
     }
-  } catch (_) {
-    // Notification failure is non-critical
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error('[WhatsApp] send failed:', res.status, errBody);
+    }
+  } catch (err) {
+    console.error('[WhatsApp] network error:', err);
   }
 };
 
