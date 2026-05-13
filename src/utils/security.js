@@ -77,8 +77,8 @@ export function isRateLimited(key, maxCalls = 5, windowMs = 60_000) {
   return false;
 }
 
-// Sanitize URL params — only allow alphanumeric + hyphens
+// Sanitize URL params — block dangerous chars, allow Unicode (Arabic slugs)
 export function sanitizeURLParam(param) {
   if (typeof param !== 'string') return '';
-  return param.replace(/[^a-zA-Z0-9-_]/g, '').slice(0, 50);
+  return param.replace(/[<>"'%;()&+\\\/]/g, '').trim().slice(0, 100);
 }

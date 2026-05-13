@@ -25,7 +25,7 @@ export default function ProductDetail() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!safeSlug) return;
+    if (!safeSlug) { setLoading(false); return; }
     const load = async () => {
       const { data } = await supabase
         .from('products')
