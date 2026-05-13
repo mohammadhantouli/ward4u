@@ -36,18 +36,23 @@ const sendWhatsAppNotification = async (order, address, orderItems) => {
     `💰 الإجمالي: ${order.total.toFixed(2)} ر.س\n` +
     `💳 الدفع: عند الاستلام`;
 
-  const firstImage = orderItems.find((i) => i.image_url)?.image_url;
+  const images = orderItems.filter((i) => i.image_url);
 
   try {
-    if (firstImage) {
-      // Send image first (no caption to avoid 1024-char limit)
+    // Send each product image separately
+    for (const item of images) {
       await fetch(`${base}/sendFileByUrl/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatId, urlFile: firstImage, fileName: 'order.jpg', caption: '🌸 طلب جديد' }),
+        body: JSON.stringify({
+          chatId,
+          urlFile: item.image_url,
+          fileName: 'product.jpg',
+          caption: `${item.product_name} ×${item.quantity}`,
+        }),
       });
     }
-    // Send full details as separate text message
+    // Send full order details as text
     const res = await fetch(`${base}/sendMessage/${token}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
