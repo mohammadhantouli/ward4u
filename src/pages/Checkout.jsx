@@ -19,11 +19,14 @@ const sendWhatsAppNotification = async (order, address, orderItems) => {
   const ownerPhone = import.meta.env.VITE_OWNER_WHATSAPP;
   if (!instance || !token || !ownerPhone) return;
 
+  const chatId = `${ownerPhone}@c.us`;
+  const base = `https://api.green-api.com/waInstance${instance}`;
+
   const itemLines = orderItems
     .map((i) => `• ${i.product_name} ×${i.quantity} — ${(i.price * i.quantity).toFixed(2)} ر.س`)
     .join('\n');
 
-  const message =
+  const caption =
     `🌸 طلب جديد #${order.id.slice(0, 8)}\n\n` +
     `👤 الاسم: ${address.name}\n` +
     `📞 الجوال: ${address.phone}\n` +
@@ -33,15 +36,27 @@ const sendWhatsAppNotification = async (order, address, orderItems) => {
     `💰 الإجمالي: ${order.total.toFixed(2)} ر.س\n` +
     `💳 الدفع: عند الاستلام`;
 
+  const firstImage = orderItems.find((i) => i.image_url)?.image_url;
+
   try {
-    await fetch(
-      `https://api.green-api.com/waInstance${instance}/sendMessage/${token}`,
-      {
+    if (firstImage) {
+      await fetch(`${base}/sendFileByUrl/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chatId: `${ownerPhone}@c.us`, message }),
-      }
-    );
+        body: JSON.stringify({
+          chatId,
+          urlFile: firstImage,
+          fileName: 'order.jpg',
+          caption,
+        }),
+      });
+    } else {
+      await fetch(`${base}/sendMessage/${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chatId, message: caption }),
+      });
+    }
   } catch (_) {
     // Notification failure is non-critical
   }
