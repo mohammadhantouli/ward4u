@@ -21,6 +21,7 @@ export default function ProductCard({ product }) {
 
   const handleAddToCart = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (product.stock === 0) return;
     setAdding(true);
     addItem(product, 1);
@@ -30,6 +31,7 @@ export default function ProductCard({ product }) {
 
   const handleWishlist = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (!user) { toast.error('يرجى تسجيل الدخول لإضافة إلى المفضلة'); return; }
     if (wishlisted) {
       await supabase.from('wishlist').delete().match({ user_id: user.id, product_id: product.id });

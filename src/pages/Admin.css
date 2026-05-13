@@ -399,7 +399,44 @@
   object-fit: cover;
   border-radius: var(--radius-sm);
   flex-shrink: 0;
+  cursor: zoom-in;
+  transition: opacity .2s;
 }
+.admin__order-item-img:hover { opacity: .8; }
+
+.admin__lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin__lightbox img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 40px rgba(0,0,0,.5);
+}
+.admin__lightbox-close {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  background: rgba(255,255,255,.15);
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .2s;
+}
+.admin__lightbox-close:hover { background: rgba(255,255,255,.3); }
 
 .admin__order-item-row span:first-of-type {
   flex: 1;

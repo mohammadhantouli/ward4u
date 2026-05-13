@@ -38,6 +38,7 @@ export default function Admin() {
   const [useUrlFallback, setUseUrlFallback] = useState(false);
   const [heroImages, setHeroImages] = useState([]);
   const [heroUploading, setHeroUploading] = useState(false);
+  const [lightboxImg, setLightboxImg] = useState(null);
   const fileInputRef = useRef(null);
   const heroFileInputRef = useRef(null);
 
@@ -484,7 +485,12 @@ export default function Admin() {
                                   {o.order_items?.map((item, i) => (
                                     <div key={i} className="admin__order-item-row">
                                       {item.image_url && (
-                                        <img src={item.image_url} alt={item.product_name} className="admin__order-item-img" />
+                                        <img
+                                          src={item.image_url}
+                                          alt={item.product_name}
+                                          className="admin__order-item-img"
+                                          onClick={() => setLightboxImg(item.image_url)}
+                                        />
                                       )}
                                       <span>{item.product_name}</span>
                                       <span>×{item.quantity}</span>
@@ -590,6 +596,13 @@ export default function Admin() {
           </div>
         )}
       </main>
+
+      {lightboxImg && (
+        <div className="admin__lightbox" onClick={() => setLightboxImg(null)}>
+          <img src={lightboxImg} alt="معاينة" onClick={(e) => e.stopPropagation()} />
+          <button className="admin__lightbox-close" onClick={() => setLightboxImg(null)}><X size={22} /></button>
+        </div>
+      )}
     </div>
   );
 }
