@@ -6,7 +6,7 @@ import './Cart.css';
 
 const getEffectivePrice = (item) =>
   item.bulk_min_qty && item.bulk_discount_pct && item.quantity >= item.bulk_min_qty
-    ? item.price * (1 - item.bulk_discount_pct / 100)
+    ? Math.max(0, (item.price * item.quantity - item.bulk_discount_pct) / item.quantity)
     : item.price;
 
 export default function Cart() {
@@ -40,13 +40,13 @@ export default function Cart() {
                     <p className="cart-item__price">
                       <span style={{ textDecoration: 'line-through', color: 'var(--color-text-muted)', fontSize: '.85rem', marginLeft: '.3rem' }}>{item.price.toFixed(2)}</span>
                       <span style={{ color: 'var(--color-secondary)', fontWeight: 700 }}>{getEffectivePrice(item).toFixed(2)} {t.sar}</span>
-                      <span className="cart-item__bulk-badge">خصم {item.bulk_discount_pct}%</span>
+                      <span className="cart-item__bulk-badge">خصم {item.bulk_discount_pct} ر.س</span>
                     </p>
                   ) : (
                     <p className="cart-item__price">
                       {item.price.toFixed(2)} {t.sar}
                       {item.bulk_min_qty && item.bulk_discount_pct && (
-                        <span className="cart-item__bulk-hint">أضف {item.bulk_min_qty - item.quantity} أكثر لخصم {item.bulk_discount_pct}%</span>
+                        <span className="cart-item__bulk-hint">أضف {item.bulk_min_qty - item.quantity} أكثر لخصم {item.bulk_discount_pct} ر.س</span>
                       )}
                     </p>
                   )}
