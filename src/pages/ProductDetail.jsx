@@ -62,16 +62,15 @@ export default function ProductDetail() {
         setProductNumber(count || 1);
 
         // Related products
-        if (data.category_id) {
-          const { data: rel } = await supabase
-            .from('products')
-            .select('*, categories(name, name_ar, slug)')
-            .eq('category_id', data.category_id)
-            .eq('is_active', true)
-            .neq('id', data.id)
-            .limit(8);
-          setRelated(rel || []);
-        }
+        let relQuery = supabase
+          .from('products')
+          .select('*, categories(name, name_ar, slug)')
+          .eq('is_active', true)
+          .neq('id', data.id)
+          .limit(8);
+        if (data.category_id) relQuery = relQuery.eq('category_id', data.category_id);
+        const { data: rel } = await relQuery;
+        setRelated(rel || []);
       }
     };
     load();
@@ -221,16 +220,6 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* Reviews */}
-        {related.length > 0 && (
-          <div className="pd__related">
-            <h2>منتجات مشابهة</h2>
-            <div className="pd__related-slider">
-              {related.map((p) => <ProductCard key={p.id} product={p} />)}
-            </div>
-          </div>
-        )}
-
         <div className="pd__reviews">
           <h2>{t.customerReviews}</h2>
           {user && (
@@ -275,6 +264,15 @@ export default function ProductDetail() {
               </div>
             )}
         </div>
+
+        {related.length > 0 && (
+          <div className="pd__related">
+            <h2>منتجات مشابهة</h2>
+            <div className="pd__related-slider">
+              {related.map((p) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          </div>
+        )}
       </div>
 
       {lightbox && (
