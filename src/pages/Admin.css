@@ -474,3 +474,46 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Extra images */
+.admin__extra-imgs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: flex-start;
+}
+.admin__extra-img-item {
+  position: relative;
+  width: 70px; height: 70px;
+}
+.admin__extra-img-item img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+.admin__extra-img-item button {
+  position: absolute;
+  top: -6px; right: -6px;
+  background: #d9534f;
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.admin__extra-add-btn {
+  width: 70px; height: 70px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: center;
+}
+.admin__extra-add-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}

@@ -1,4 +1,11 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { LangProvider } from './context/LangContext';
@@ -19,6 +26,7 @@ import Wishlist from './pages/Wishlist';
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <LangProvider>
       <AuthProvider>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

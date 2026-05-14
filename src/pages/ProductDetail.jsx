@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import { sanitizeURLParam, clampNumber, sanitizeText, isRateLimited } from '../utils/security';
 import toast from 'react-hot-toast';
+import ProductCard from '../components/ui/ProductCard';
 import './ProductDetail.css';
 
 export default function ProductDetail() {
@@ -23,6 +24,7 @@ export default function ProductDetail() {
   const [activeImg, setActiveImg] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [reviews, setReviews] = useState([]);
+  const [related, setRelated] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [submitting, setSubmitting] = useState(false);
 
@@ -58,6 +60,18 @@ export default function ProductDetail() {
           .lte('created_at', data.created_at)
           .eq('is_active', true);
         setProductNumber(count || 1);
+
+        // Related products
+        if (data.category_id) {
+          const { data: rel } = await supabase
+            .from('products')
+            .select('*, categories(name, name_ar, slug)')
+            .eq('category_id', data.category_id)
+            .eq('is_active', true)
+            .neq('id', data.id)
+            .limit(8);
+          setRelated(rel || []);
+        }
       }
     };
     load();
@@ -208,6 +222,15 @@ export default function ProductDetail() {
         </div>
 
         {/* Reviews */}
+        {related.length > 0 && (
+          <div className="pd__related">
+            <h2>منتجات مشابهة</h2>
+            <div className="pd__related-slider">
+              {related.map((p) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          </div>
+        )}
+
         <div className="pd__reviews">
           <h2>{t.customerReviews}</h2>
           {user && (

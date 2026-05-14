@@ -16,7 +16,7 @@ const STATUS_OPTIONS = [
   { value: 'delivered', label: 'تم التوصيل' },
   { value: 'cancelled', label: 'ملغى' },
 ];
-const EMPTY_PRODUCT = { name: '', slug: '', description: '', price: '', original_price: '', stock: '', image_url: '', is_featured: false, is_active: true, category_id: '', bulk_min_qty: '', bulk_discount_pct: '' };
+const EMPTY_PRODUCT = { name: '', slug: '', description: '', price: '', original_price: '', stock: '', image_url: '', extra_images: [], is_featured: false, is_active: true, category_id: '', bulk_min_qty: '', bulk_discount_pct: '' };
 
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
@@ -150,6 +150,21 @@ export default function Admin() {
     setUploading(false);
   };
 
+  const handleExtraImageUpload = async (file) => {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error('الصورة أكبر من 5 ميغابايت'); return; }
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) { toast.error('نوع ملف غير مدعوم'); return; }
+    setUploading(true);
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('product-images').upload(fileName, file, { cacheControl: '3600', upsert: false });
+    if (error) { toast.error('فشل رفع الصورة: ' + error.message); setUploading(false); return; }
+    const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+    setForm((f) => ({ ...f, extra_images: [...(f.extra_images || []), urlData.publicUrl] }));
+    toast.success('تم رفع الصورة ✓');
+    setUploading(false);
+  };
+
   const handleProductSave = async (e) => {
     e.preventDefault();
     if (isRateLimited(`admin-product-${user.id}`, 20, 60_000)) { toast.error('Too many requests'); return; }
@@ -173,6 +188,7 @@ export default function Admin() {
       category_id: form.category_id || null,
       bulk_min_qty: form.bulk_min_qty ? parseInt(form.bulk_min_qty, 10) : null,
       bulk_discount_pct: form.bulk_discount_pct ? parseFloat(form.bulk_discount_pct) : null,
+      images: form.extra_images?.length ? form.extra_images : null,
     };
 
     setSavingProd(true);
@@ -220,6 +236,7 @@ export default function Admin() {
       stock: String(p.stock),
       bulk_min_qty: p.bulk_min_qty ? String(p.bulk_min_qty) : '',
       bulk_discount_pct: p.bulk_discount_pct ? String(p.bulk_discount_pct) : '',
+      extra_images: p.images || [],
     });
     setShowForm(true);
   };
@@ -365,6 +382,24 @@ export default function Admin() {
                       </button>
                     </div>
                   )}
+                </div>
+                <div className="form-group">
+                  <label>صور إضافية</label>
+                  <div className="admin__extra-imgs">
+                    {(form.extra_images || []).map((url, i) => (
+                      <div key={i} className="admin__extra-img-item">
+                        <img src={url} alt="" />
+                        <button type="button" onClick={() => setForm(f => ({ ...f, extra_images: f.extra_images.filter((_, j) => j !== i) }))}>
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                    <label className="admin__extra-add-btn">
+                      <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploading}
+                        onChange={(e) => { handleExtraImageUpload(e.target.files[0]); e.target.value = ''; }} />
+                      {uploading ? '...' : '+ صورة'}
+                    </label>
+                  </div>
                 </div>
                 <div className="form-group">
                   <label>{t.category}</label>
