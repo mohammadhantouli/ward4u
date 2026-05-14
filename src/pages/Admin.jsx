@@ -380,7 +380,6 @@ export default function Admin() {
                       type="number" min="2" step="1"
                       value={form.bulk_min_qty}
                       onChange={(e) => setForm(f => ({ ...f, bulk_min_qty: e.target.value }))}
-                      placeholder="مثال: 6"
                     />
                   </div>
                   <div className="form-group">
@@ -388,8 +387,18 @@ export default function Admin() {
                     <input
                       type="number" min="1" max="99" step="0.5"
                       value={form.bulk_discount_pct}
-                      onChange={(e) => setForm(f => ({ ...f, bulk_discount_pct: e.target.value }))}
-                      placeholder="مثال: 10"
+                      onChange={(e) => {
+                        const pct = e.target.value;
+                        setForm(f => {
+                          const updates = { ...f, bulk_discount_pct: pct };
+                          if (pct && f.price) {
+                            const base = f.original_price ? parseFloat(f.original_price) : parseFloat(f.price);
+                            if (!f.original_price) updates.original_price = f.price;
+                            updates.price = (base * (1 - parseFloat(pct) / 100)).toFixed(2);
+                          }
+                          return updates;
+                        });
+                      }}
                     />
                   </div>
                 </div>
