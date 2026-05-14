@@ -10,7 +10,7 @@ import './Checkout.css';
 
 const getEffectivePrice = (item) =>
   item.bulk_min_qty && item.bulk_discount_pct && item.quantity >= item.bulk_min_qty
-    ? item.price * (1 - item.bulk_discount_pct / 100)
+    ? Math.max(0, (item.price * item.quantity - item.bulk_discount_pct) / item.quantity)
     : item.price;
 
 const sendWhatsAppNotification = async (order, address, orderItems) => {

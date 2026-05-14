@@ -383,22 +383,11 @@ export default function Admin() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>نسبة الخصم % (عند بلوغ الحد)</label>
+                    <label>مبلغ الخصم الثابت (عند بلوغ الحد)</label>
                     <input
-                      type="number" min="1" max="99" step="0.5"
+                      type="number" min="0" step="0.01"
                       value={form.bulk_discount_pct}
-                      onChange={(e) => {
-                        const pct = e.target.value;
-                        setForm(f => {
-                          const updates = { ...f, bulk_discount_pct: pct };
-                          if (pct && f.price) {
-                            const base = f.original_price ? parseFloat(f.original_price) : parseFloat(f.price);
-                            if (!f.original_price) updates.original_price = f.price;
-                            updates.price = (base * (1 - parseFloat(pct) / 100)).toFixed(2);
-                          }
-                          return updates;
-                        });
-                      }}
+                      onChange={(e) => setForm(f => ({ ...f, bulk_discount_pct: e.target.value }))}
                     />
                   </div>
                 </div>
