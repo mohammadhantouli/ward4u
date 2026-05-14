@@ -78,17 +78,45 @@
   color: var(--color-primary-dark);
 }
 
+/* Cart button — golden pill */
+.navbar__cart-btn {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  background: #D4A017;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: .45rem 1rem .45rem .75rem;
+  font-weight: 700;
+  font-size: .9rem;
+  position: relative;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 2px 10px rgba(212,160,23,.45);
+  text-decoration: none;
+}
+.navbar__cart-btn:hover {
+  background: #b8880e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(212,160,23,.55);
+  color: #fff;
+}
+
+.navbar__cart-label { font-size: .88rem; }
+
 /* Cart badge */
 .navbar__cart-badge {
   position: absolute;
-  top: 2px; right: 2px;
-  background: var(--color-primary-dark);
+  top: -6px; right: -6px;
+  background: #d9534f;
   color: #fff;
   font-size: .65rem;
   font-weight: 700;
   border-radius: 999px;
-  width: 16px; height: 16px;
+  min-width: 18px; height: 18px;
+  padding: 0 4px;
   display: flex; align-items: center; justify-content: center;
+  border: 2px solid #fff;
 }
 
 /* Search form */

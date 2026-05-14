@@ -112,8 +112,9 @@ export default function Navbar() {
           )}
 
           {/* Cart */}
-          <Link to="/cart" className="navbar__icon-btn navbar__cart-btn" aria-label={t.cart}>
+          <Link to="/cart" className="navbar__cart-btn" aria-label={t.cart}>
             <ShoppingCart size={20} />
+            <span className="navbar__cart-label">{t.cart}</span>
             {cartCount > 0 && <span className="navbar__cart-badge">{cartCount}</span>}
           </Link>
 
