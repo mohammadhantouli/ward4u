@@ -178,6 +178,12 @@ export default function ProductDetail() {
                 : <span className="pd__out-stock">{t.outOfStock}</span>}
             </div>
 
+            {product.bulk_min_qty && product.bulk_discount_pct && (
+              <div className="pd__bulk-offer">
+                🎁 عرض خاص: اشترِ {product.bulk_min_qty} قطع أو أكثر واحصل على خصم {product.bulk_discount_pct} ₪ على الإجمالي
+              </div>
+            )}
+
             {product.stock > 0 && (
               <div className="pd__actions">
                 <div className="pd__qty">

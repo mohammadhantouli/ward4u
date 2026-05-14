@@ -132,6 +132,17 @@
 .pd__in-stock  { color: var(--color-secondary); font-weight: 600; }
 .pd__out-stock { color: #d9534f; font-weight: 600; }
 
+.pd__bulk-offer {
+  background: #fff8e1;
+  border: 1.5px solid #f9a825;
+  border-radius: var(--radius-sm);
+  padding: .6rem 1rem;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #7a5c00;
+  margin-bottom: .5rem;
+}
+
 .pd__actions {
   display: flex;
   align-items: center;

@@ -23,7 +23,7 @@ const sendWhatsAppNotification = async (order, address, orderItems) => {
   const base = `https://api.green-api.com/waInstance${instance}`;
 
   const itemLines = orderItems
-    .map((i) => `• ${i.product_name} ×${i.quantity} — ${(i.price * i.quantity).toFixed(2)} ر.س`)
+    .map((i) => `• ${i.product_name} ×${i.quantity} — ${(i.price * i.quantity).toFixed(2)} ₪`)
     .join('\n');
 
   const caption =
@@ -33,7 +33,7 @@ const sendWhatsAppNotification = async (order, address, orderItems) => {
     `📍 العنوان: ${address.city}${address.district ? '، ' + address.district : ''}، ${address.street}\n` +
     (address.notes ? `📝 ملاحظات: ${address.notes}\n` : '') +
     `\n🛒 المنتجات:\n${itemLines}\n\n` +
-    `💰 الإجمالي: ${order.total.toFixed(2)} ر.س\n` +
+    `💰 الإجمالي: ${order.total.toFixed(2)} ₪\n` +
     `💳 الدفع: عند الاستلام`;
 
   const images = orderItems.filter((i) => i.image_url);

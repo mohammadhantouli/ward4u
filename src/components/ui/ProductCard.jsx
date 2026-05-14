@@ -82,7 +82,7 @@ export default function ProductCard({ product }) {
           )}
         </div>
         {product.bulk_min_qty && product.bulk_discount_pct && (
-          <p className="product-card__bulk">خصم {product.bulk_discount_pct} ر.س عند شراء {product.bulk_min_qty}+</p>
+          <p className="product-card__bulk">خصم {product.bulk_discount_pct} ₪ عند شراء {product.bulk_min_qty}+</p>
         )}
 
         <button
