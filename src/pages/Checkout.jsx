@@ -153,7 +153,7 @@ export default function Checkout() {
       navigate(user ? '/orders' : '/');
     } catch (err) {
       console.error('[Checkout error]', err);
-      toast.error('حدث خطأ. يرجى المحاولة مرة أخرى.');
+      toast.error(err?.message || 'حدث خطأ. يرجى المحاولة مرة أخرى.');
     } finally {
       setSubmitting(false);
     }
