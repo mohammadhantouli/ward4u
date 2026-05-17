@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import wardLogo from '../../assets/ward.png';
+import wardLogo from '../../assets/logo.png';
 import { ShoppingCart, Search, User, Menu, X, Heart, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCartStore } from '../../store/cartStore';

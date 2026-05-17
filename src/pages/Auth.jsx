@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import { sanitizeText, isValidEmail, isRateLimited } from '../utils/security';
 import toast from 'react-hot-toast';
+import authLogo from '../assets/logo.png';
 import './Auth.css';
 
 export default function Auth() {
@@ -81,7 +82,7 @@ export default function Auth() {
       <div className="auth-card">
         <div className="auth-card__header">
           <Link to="/" className="auth-logo">
-            <span>ورد</span><span>4U</span>
+            <img src={authLogo} alt="Ward 4U" className="auth-logo__img" />
           </Link>
           <h1>{mode === 'login' ? t.welcomeBack : t.createAccount}</h1>
           <p>{mode === 'login' ? t.signInSub : t.createAccountSub}</p>

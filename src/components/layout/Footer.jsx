@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
-import wardLogo from '../../assets/ward.png';
+import wardLogo from '../../assets/logo.png';
 import './Footer.css';
 
 function InstagramIcon() {
