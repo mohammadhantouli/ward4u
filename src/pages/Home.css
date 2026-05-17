@@ -3,7 +3,7 @@
 ═══════════════════════════════════════ */
 .hero {
   position: relative;
-  min-height: 560px;
+  min-height: 400px;
   background: linear-gradient(135deg, #FDF6F0 60%, #F5D5D8);
   overflow: hidden;
   display: flex;
@@ -22,23 +22,22 @@
   z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+  justify-content: center;
+  gap: 1.5rem;
   width: 100%;
-  padding: 4rem 0;
+  padding: 2rem 0;
 }
 
 .hero__content {
-  flex: 1;
-  max-width: 500px;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .hero__left-img {
-  width: 100%;
-  max-width: 480px;
+  width: auto;
+  max-width: 380px;
   height: auto;
   object-fit: contain;
   border-radius: 1.5rem;

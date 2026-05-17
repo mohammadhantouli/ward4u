@@ -156,7 +156,7 @@ export default function ProductDetail() {
               </Link>
             </p>
             <div className="pd__meta-row">
-              {productNumber && <span className="pd__number">#{productNumber}</span>}
+              {productNumber && <span className="pd__number">{productNumber}</span>}
             </div>
             <h1 className="pd__name">{product.name_ar || product.name}</h1>
             {product.view_count > 0 && (
