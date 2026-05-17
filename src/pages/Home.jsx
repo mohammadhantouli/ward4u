@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Filter, X, Search, ArrowLeft } from 'lucide-react';
+import { Filter, X, Search } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useLang } from '../context/LangContext';
 import { sanitizeSearch, sanitizeURLParam, isRateLimited } from '../utils/security';
@@ -123,19 +123,9 @@ export default function Home() {
         <div className="hero__bg" />
 
         <div className="container hero__inner">
-          {/* Left: store name, title, subtitle, CTA */}
+          {/* Left: hero image */}
           <div className="hero__content">
-            <p className="hero__tag">{t.heroTag}</p>
-            <h1 className="hero__title">
-              {t.heroTitle}<br />
-              <span>{t.heroTitleSpan}</span>
-            </h1>
-            <p className="hero__sub">{t.heroSub}</p>
-            <div className="hero__cta">
-              <Link to="/shop" className="btn btn-primary hero__btn">
-                {t.shopNow} <ArrowLeft size={18} />
-              </Link>
-            </div>
+            <img src="/ward22.jpeg" alt="زهور" className="hero__left-img" />
           </div>
 
           {/* Right: slideshow */}

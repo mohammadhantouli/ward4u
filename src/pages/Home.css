@@ -31,6 +31,18 @@
 .hero__content {
   flex: 1;
   max-width: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero__left-img {
+  width: 100%;
+  max-width: 480px;
+  height: 420px;
+  object-fit: cover;
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
 }
 
 .hero__tag {
