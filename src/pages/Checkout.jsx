@@ -120,9 +120,11 @@ export default function Checkout() {
         notes:    sanitizeText(form.notes),
       };
 
-      const { data: order, error: orderErr } = await supabase
+      const orderId = crypto.randomUUID();
+      const { error: orderErr } = await supabase
         .from('orders')
         .insert({
+          id: orderId,
           user_id: user?.id || null,
           total: subtotal,
           delivery_fee: 0,
@@ -130,10 +132,10 @@ export default function Checkout() {
           payment_method: form.payment,
           notes: sanitizeText(form.notes),
           status: 'pending',
-        })
-        .select().single();
+        });
 
       if (orderErr) throw orderErr;
+      const order = { id: orderId };
 
       const orderItems = items.map((i) => ({
         order_id:     order.id,
