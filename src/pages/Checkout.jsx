@@ -135,7 +135,7 @@ export default function Checkout() {
         });
 
       if (orderErr) throw orderErr;
-      const order = { id: orderId };
+      const order = { id: orderId, total: subtotal };
 
       const orderItems = items.map((i) => ({
         order_id:     order.id,
