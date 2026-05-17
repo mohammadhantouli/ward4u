@@ -152,8 +152,8 @@ export default function Checkout() {
       toast.success('تم تأكيد طلبك بنجاح!');
       navigate(user ? '/orders' : '/');
     } catch (err) {
+      console.error('[Checkout error]', err);
       toast.error('حدث خطأ. يرجى المحاولة مرة أخرى.');
-      console.error(err);
     } finally {
       setSubmitting(false);
     }
