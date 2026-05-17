@@ -150,7 +150,7 @@ export default function Checkout() {
       if (itemsErr) throw itemsErr;
 
       clearCart();
-      sendWhatsAppNotification(order, deliveryAddress, orderItems);
+      await sendWhatsAppNotification(order, deliveryAddress, orderItems);
       toast.success('تم تأكيد طلبك بنجاح!');
       navigate(user ? '/orders' : '/');
     } catch (err) {
