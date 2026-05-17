@@ -219,6 +219,15 @@ export default function ProductDetail() {
           </div>
         </div>
 
+        {related.length > 0 && (
+          <div className="pd__related">
+            <h2>منتجات موصى بها</h2>
+            <div className="pd__related-slider">
+              {related.map((p) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          </div>
+        )}
+
         <div className="pd__reviews">
           <h2>{t.customerReviews}</h2>
           {user && (
@@ -264,14 +273,6 @@ export default function ProductDetail() {
             )}
         </div>
 
-        {related.length > 0 && (
-          <div className="pd__related">
-            <h2>منتجات موصى بها</h2>
-            <div className="pd__related-slider">
-              {related.map((p) => <ProductCard key={p.id} product={p} />)}
-            </div>
-          </div>
-        )}
       </div>
 
       {lightbox && (

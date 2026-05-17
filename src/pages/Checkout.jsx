@@ -4,7 +4,7 @@ import { useCartStore } from '../store/cartStore';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../context/LangContext';
 import { supabase } from '../lib/supabase';
-import { sanitizeText, isValidPhone, clampNumber, isRateLimited } from '../utils/security';
+import { sanitizeText, clampNumber, isRateLimited } from '../utils/security';
 import toast from 'react-hot-toast';
 import './Checkout.css';
 
@@ -86,7 +86,6 @@ export default function Checkout() {
   const [errors, setErrors]     = useState({});
   const [submitting, setSubmitting] = useState(false);
 
-  if (!user) { navigate('/auth?redirect=/checkout'); return null; }
   if (items.length === 0) { navigate('/cart'); return null; }
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -94,7 +93,7 @@ export default function Checkout() {
   const validate = () => {
     const errs = {};
     if (!sanitizeText(form.name) || sanitizeText(form.name).length < 2) errs.name = 'أدخل اسمك الكامل';
-    if (!isValidPhone(form.phone)) errs.phone = 'أدخل رقم جوال سعودي صحيح (05xxxxxxxx)';
+    if (!form.phone || form.phone.trim().length < 6) errs.phone = 'أدخل رقم هاتف صحيح';
     if (!sanitizeText(form.city))   errs.city   = 'المدينة مطلوبة';
     if (!sanitizeText(form.street)) errs.street = 'العنوان مطلوب';
     return errs;
@@ -102,7 +101,7 @@ export default function Checkout() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isRateLimited(`checkout-${user.id}`, 3, 120_000)) {
+    if (isRateLimited(`checkout-${user?.id || 'guest'}`, 3, 120_000)) {
       toast.error('محاولات كثيرة. انتظر قليلاً.');
       return;
     }
@@ -124,7 +123,7 @@ export default function Checkout() {
       const { data: order, error: orderErr } = await supabase
         .from('orders')
         .insert({
-          user_id: user.id,
+          user_id: user?.id || null,
           total: subtotal,
           delivery_fee: 0,
           delivery_address: deliveryAddress,
@@ -151,7 +150,7 @@ export default function Checkout() {
       clearCart();
       sendWhatsAppNotification(order, deliveryAddress, orderItems);
       toast.success('تم تأكيد طلبك بنجاح!');
-      navigate('/orders');
+      navigate(user ? '/orders' : '/');
     } catch (err) {
       toast.error('حدث خطأ. يرجى المحاولة مرة أخرى.');
       console.error(err);
@@ -175,7 +174,7 @@ export default function Checkout() {
               </div>
               <div className="form-group">
                 <label>{t.phone} *</label>
-                <input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="05xxxxxxxx" maxLength={15} dir="ltr" />
+                <input type="tel" value={form.phone} onChange={(e) => set('phone', e.target.value)} placeholder="رقم الهاتف" maxLength={20} dir="ltr" />
                 {errors.phone && <span className="error-msg">{errors.phone}</span>}
               </div>
               <div className="grid-2">
