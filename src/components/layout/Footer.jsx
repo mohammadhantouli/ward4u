@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, Users, Eye, ShoppingBag } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
+import { supabase } from '../../lib/supabase';
 import wardLogo from '../../assets/logo.png';
 import './Footer.css';
 
@@ -16,6 +18,23 @@ function InstagramIcon() {
 
 export default function Footer() {
   const { t } = useLang();
+  const [stats, setStats] = useState({ users: 0, views: 0, orders: 0 });
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('products').select('view_count'),
+      supabase.from('orders').select('*', { count: 'exact', head: true }),
+    ]).then(([users, products, orders]) => {
+      const totalViews = (products.data || []).reduce((sum, p) => sum + (p.view_count || 0), 0);
+      setStats({
+        users: users.count || 0,
+        views: totalViews,
+        orders: orders.count || 0,
+      });
+    });
+  }, []);
+
   return (
     <footer className="footer">
       <div className="container footer__inner">
@@ -57,6 +76,32 @@ export default function Footer() {
           <span className="footer__contact-item">
             <MapPin size={15} /> الناصره-الفاخوره
           </span>
+        </div>
+      </div>
+
+      <div className="footer__stats">
+        <div className="container footer__stats-inner">
+          <div className="footer__stat">
+            <div className="footer__stat-icon footer__stat-icon--pink">
+              <Users size={22} />
+            </div>
+            <span className="footer__stat-num">+{stats.users}</span>
+            <span className="footer__stat-label">مستخدم مسجل</span>
+          </div>
+          <div className="footer__stat">
+            <div className="footer__stat-icon footer__stat-icon--rose">
+              <Eye size={22} />
+            </div>
+            <span className="footer__stat-num">+{stats.views}</span>
+            <span className="footer__stat-label">زيارة للموقع</span>
+          </div>
+          <div className="footer__stat">
+            <div className="footer__stat-icon footer__stat-icon--gold">
+              <ShoppingBag size={22} />
+            </div>
+            <span className="footer__stat-num">+{stats.orders}</span>
+            <span className="footer__stat-label">طلب مكتمل</span>
+          </div>
         </div>
       </div>
 
