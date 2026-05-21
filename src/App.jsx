@@ -6,7 +6,9 @@ function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
-    supabase.from('site_visits').insert({});
+    supabase.rpc('increment_site_visits').then(({ error }) => {
+      if (error) console.error('visit rpc error:', error);
+    });
   }, [pathname]);
   return null;
 }
