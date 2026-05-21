@@ -20,18 +20,33 @@ export default function Footer() {
   const { t } = useLang();
   const [stats, setStats] = useState({ products: 0, visits: 0, categories: 0 });
 
+  const fetchVisits = async () => {
+    const { count } = await supabase.from('site_visits').select('*', { count: 'exact', head: true });
+    setStats((s) => ({ ...s, visits: count || 0 }));
+  };
+
   useEffect(() => {
     Promise.all([
       supabase.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true),
       supabase.from('categories').select('*', { count: 'exact', head: true }),
-      supabase.from('site_visits').select('*', { count: 'exact', head: true }),
-    ]).then(([products, categories, visits]) => {
-      setStats({
+    ]).then(([products, categories]) => {
+      setStats((s) => ({
+        ...s,
         products: products.count || 0,
-        visits: visits.count || 0,
         categories: categories.count || 0,
-      });
+      }));
     });
+
+    // slight delay so the insert from App.jsx lands first
+    setTimeout(fetchVisits, 500);
+
+    // realtime: re-fetch whenever a new visit is inserted
+    const channel = supabase
+      .channel('site_visits_count')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'site_visits' }, fetchVisits)
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
   }, []);
 
   return (
