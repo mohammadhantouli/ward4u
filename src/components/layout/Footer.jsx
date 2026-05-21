@@ -21,8 +21,8 @@ export default function Footer() {
   const [stats, setStats] = useState({ products: 0, visits: 0, categories: 0 });
 
   const fetchVisits = async () => {
-    const { count } = await supabase.from('site_visits').select('*', { count: 'exact', head: true });
-    setStats((s) => ({ ...s, visits: count || 0 }));
+    const { data } = await supabase.rpc('get_visit_count');
+    setStats((s) => ({ ...s, visits: data || 0 }));
   };
 
   useEffect(() => {
