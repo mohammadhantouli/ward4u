@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Users, Eye, ShoppingBag } from 'lucide-react';
+import { Phone, Mail, MapPin, Flower2, Eye, Tag } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import { supabase } from '../../lib/supabase';
 import wardLogo from '../../assets/logo.png';
@@ -18,19 +18,18 @@ function InstagramIcon() {
 
 export default function Footer() {
   const { t } = useLang();
-  const [stats, setStats] = useState({ users: 0, views: 0, orders: 0 });
+  const [stats, setStats] = useState({ products: 0, visits: 0, categories: 0 });
 
   useEffect(() => {
     Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
-      supabase.from('products').select('view_count'),
-      supabase.from('orders').select('*', { count: 'exact', head: true }),
-    ]).then(([users, products, orders]) => {
-      const totalViews = (products.data || []).reduce((sum, p) => sum + (p.view_count || 0), 0);
+      supabase.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.from('categories').select('*', { count: 'exact', head: true }),
+      supabase.from('site_visits').select('*', { count: 'exact', head: true }),
+    ]).then(([products, categories, visits]) => {
       setStats({
-        users: users.count || 0,
-        views: totalViews,
-        orders: orders.count || 0,
+        products: products.count || 0,
+        visits: visits.count || 0,
+        categories: categories.count || 0,
       });
     });
   }, []);
@@ -83,24 +82,24 @@ export default function Footer() {
         <div className="container footer__stats-inner">
           <div className="footer__stat">
             <div className="footer__stat-icon footer__stat-icon--pink">
-              <Users size={22} />
+              <Flower2 size={22} />
             </div>
-            <span className="footer__stat-num">+{stats.users}</span>
-            <span className="footer__stat-label">مستخدم مسجل</span>
+            <span className="footer__stat-num">+{stats.products}</span>
+            <span className="footer__stat-label">منتج متاح</span>
           </div>
           <div className="footer__stat">
             <div className="footer__stat-icon footer__stat-icon--rose">
               <Eye size={22} />
             </div>
-            <span className="footer__stat-num">+{stats.views}</span>
+            <span className="footer__stat-num">+{stats.visits}</span>
             <span className="footer__stat-label">زيارة للموقع</span>
           </div>
           <div className="footer__stat">
             <div className="footer__stat-icon footer__stat-icon--gold">
-              <ShoppingBag size={22} />
+              <Tag size={22} />
             </div>
-            <span className="footer__stat-num">+{stats.orders}</span>
-            <span className="footer__stat-label">طلب مكتمل</span>
+            <span className="footer__stat-num">+{stats.categories}</span>
+            <span className="footer__stat-label">تصنيف</span>
           </div>
         </div>
       </div>

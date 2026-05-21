@@ -1,9 +1,13 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import { supabase } from './lib/supabase';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    supabase.from('site_visits').insert({});
+  }, [pathname]);
   return null;
 }
 import { Toaster } from 'react-hot-toast';
