@@ -115,6 +115,15 @@
   margin-top: .5rem;
   font-size: .88rem;
   padding: .55rem;
+  background: linear-gradient(135deg, #D4A017, #B8962E) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(184,150,46,.30);
+}
+.product-card__btn:hover {
+  background: linear-gradient(135deg, #C49010, #A07820) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(184,150,46,.45) !important;
 }
 .product-card__btn--adding {
   background: var(--color-secondary) !important;
@@ -122,7 +131,7 @@
 .product-card__btn:disabled {
   background: var(--color-border) !important;
   cursor: not-allowed;
-  color: var(--color-text-muted);
+  color: var(--color-text-muted) !important;
   transform: none !important;
   box-shadow: none !important;
 }

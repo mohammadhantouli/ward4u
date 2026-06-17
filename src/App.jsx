@@ -28,6 +28,27 @@ import Profile from './pages/Profile';
 import Admin from './pages/Admin';
 import About from './pages/About';
 import Wishlist from './pages/Wishlist';
+import './App.css';
+
+/* ---- Floating WhatsApp Button ---- */
+function WhatsAppFloat() {
+  const phone = '972528997136'; // ← غيّر هذا الرقم لرقمك
+  const message = encodeURIComponent('مرحباً، أريد الاستفسار عن منتجاتكم 🌸');
+  return (
+    <a
+      href={`https://wa.me/${phone}?text=${message}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="whatsapp-float"
+      aria-label="تواصل عبر واتساب"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" fill="#fff">
+        <path d="M16 0C7.163 0 0 7.163 0 16c0 2.823.736 5.476 2.027 7.784L0 32l8.395-2.002A15.94 15.94 0 0 0 16 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.29 13.29 0 0 1-6.747-1.83l-.484-.29-5.017 1.196 1.236-4.888-.319-.503A13.31 13.31 0 0 1 2.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.31-9.988c-.4-.2-2.368-1.167-2.735-1.3-.367-.133-.634-.2-.9.2s-1.034 1.3-1.267 1.567c-.233.267-.467.3-.867.1-.4-.2-1.688-.622-3.216-1.983-1.188-1.06-1.99-2.37-2.223-2.77-.233-.4-.025-.616.175-.816.18-.178.4-.467.6-.7.2-.233.267-.4.4-.667.133-.267.067-.5-.033-.7-.1-.2-.9-2.17-1.234-2.97-.324-.78-.654-.674-.9-.686l-.767-.013c-.267 0-.7.1-1.067.5s-1.4 1.367-1.4 3.333 1.433 3.867 1.633 4.133c.2.267 2.822 4.307 6.836 6.037.956.413 1.702.66 2.284.845.96.305 1.834.262 2.524.159.77-.115 2.368-.968 2.702-1.903.333-.934.333-1.734.233-1.903-.1-.167-.367-.267-.767-.467z"/>
+      </svg>
+      <span>واتساب</span>
+    </a>
+  );
+}
 
 export default function App() {
   return (
@@ -55,6 +76,7 @@ export default function App() {
           </main>
           <Footer />
         </div>
+        <WhatsAppFloat />
         <Toaster
           position="top-right"
           toastOptions={{
