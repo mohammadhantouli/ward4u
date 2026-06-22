@@ -155,8 +155,13 @@ export default function ProductDetail() {
                 {product.categories?.name_ar || product.categories?.name}
               </Link>
             </p>
-            <div className="pd__meta-row">
-              {productNumber && <span className="pd__number">{productNumber}</span>}
+            <div className="pd__meta-row" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.5rem' }}>
+              {productNumber && (
+                <>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--color-text-muted)' }}>رقم الوردة:</span>
+                  <span className="pd__number">{productNumber}</span>
+                </>
+              )}
             </div>
             <h1 className="pd__name">{product.name_ar || product.name}</h1>
             {product.view_count > 0 && (

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Filter, X, Search } from 'lucide-react';
+import { Filter, X, Search, Truck, ShieldCheck, Flower2, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useLang } from '../context/LangContext';
 import { sanitizeSearch, sanitizeURLParam, isRateLimited } from '../utils/security';
@@ -152,6 +152,51 @@ export default function Home() {
                   aria-label={`صورة ${i + 1}`}
                 />
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Features Trust Banner ── */}
+      <section className="features-banner">
+        <div className="container features-banner__inner">
+          <div className="features-banner__item">
+            <div className="features-banner__icon">
+              <Truck size={24} />
+            </div>
+            <div className="features-banner__text">
+              <h3>توصيل سريع</h3>
+              <p>نصلك أينما كنت بأمان</p>
+            </div>
+          </div>
+          
+          <div className="features-banner__item">
+            <div className="features-banner__icon">
+              <ShieldCheck size={24} />
+            </div>
+            <div className="features-banner__text">
+              <h3>دفع آمن</h3>
+              <p>طرق دفع موثوقة ومحمية</p>
+            </div>
+          </div>
+
+          <div className="features-banner__item">
+            <div className="features-banner__icon">
+              <Flower2 size={24} />
+            </div>
+            <div className="features-banner__text">
+              <h3>ورد طبيعي طازج</h3>
+              <p>نختار زهورنا بعناية فائقة</p>
+            </div>
+          </div>
+
+          <div className="features-banner__item">
+            <div className="features-banner__icon">
+              <MessageCircle size={24} />
+            </div>
+            <div className="features-banner__text">
+              <h3>خدمة زبائن عبر واتساب</h3>
+              <p>دعم متواصل على مدار الساعة</p>
             </div>
           </div>
         </div>
