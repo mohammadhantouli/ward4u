@@ -18,6 +18,67 @@ const STATUS_OPTIONS = [
 ];
 const EMPTY_PRODUCT = { name: '', slug: '', description: '', price: '', original_price: '', stock: '', image_url: '', extra_images: [], is_featured: false, is_active: true, category_id: '', bulk_min_qty: '', bulk_discount_pct: '' };
 
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    const ext = file.name.split('.').pop().toLowerCase();
+    // Do not compress GIFs or files that are not common images
+    if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+      resolve(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1000;
+        const MAX_HEIGHT = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.75
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
 export default function Admin() {
   const { user, isAdmin, loading } = useAuth();
   const { t } = useLang();
@@ -112,30 +173,47 @@ export default function Admin() {
     else { toast.success('تم حذف الصورة'); loadHeroImages(); }
   };
 
-  const handleHeroUpload = async (file) => {
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error('الصورة أكبر من 5 ميغابايت'); return; }
-    const ext = file.name.split('.').pop().toLowerCase();
+  const handleHeroUpload = async (rawFile) => {
+    if (!rawFile) return;
+    const ext = rawFile.name.split('.').pop().toLowerCase();
     if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) { toast.error('نوع ملف غير مدعوم'); return; }
     setHeroUploading(true);
-    const fileName = `hero-${Date.now()}.${ext}`;
+    
+    let file = rawFile;
+    try {
+      file = await compressImage(rawFile);
+    } catch (e) {
+      console.error("Compression error:", e);
+    }
+
+    if (file.size > 5 * 1024 * 1024) { toast.error('الصورة أكبر من 5 ميغابايت'); setHeroUploading(false); return; }
+    const fileName = `hero-${Date.now()}.jpg`;
     const { error } = await supabase.storage
       .from('hero-images')
       .upload(fileName, file, { cacheControl: '3600', upsert: false });
     if (error) toast.error('فشل الرفع: ' + error.message);
-    else { toast.success('تم رفع الصورة ✓'); loadHeroImages(); }
+    else { toast.success('تم رفع الصورة بنجاح ✓'); loadHeroImages(); }
     setHeroUploading(false);
   };
 
-  const handleImageUpload = async (file) => {
-    if (!file) return;
-    const maxSize = 5 * 1024 * 1024; // 5 MB
-    if (file.size > maxSize) { toast.error('الصورة أكبر من 5 ميغابايت'); return; }
-    const ext = file.name.split('.').pop().toLowerCase();
+  const handleImageUpload = async (rawFile) => {
+    if (!rawFile) return;
+    const ext = rawFile.name.split('.').pop().toLowerCase();
     const allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     if (!allowed.includes(ext)) { toast.error('نوع ملف غير مدعوم'); return; }
     setUploading(true);
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    let file = rawFile;
+    try {
+      file = await compressImage(rawFile);
+    } catch (e) {
+      console.error("Compression error:", e);
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+    if (file.size > maxSize) { toast.error('الصورة أكبر من 5 ميغابايت'); setUploading(false); return; }
+    
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
     const { error } = await supabase.storage
       .from('product-images')
       .upload(fileName, file, { cacheControl: '3600', upsert: false });
@@ -146,22 +224,30 @@ export default function Admin() {
     }
     const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
     setForm((f) => ({ ...f, image_url: urlData.publicUrl }));
-    toast.success('تم رفع الصورة ✓');
+    toast.success('تم رفع الصورة بنجاح ✓');
     setUploading(false);
   };
 
-  const handleExtraImageUpload = async (file) => {
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error('الصورة أكبر من 5 ميغابايت'); return; }
-    const ext = file.name.split('.').pop().toLowerCase();
+  const handleExtraImageUpload = async (rawFile) => {
+    if (!rawFile) return;
+    const ext = rawFile.name.split('.').pop().toLowerCase();
     if (!['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) { toast.error('نوع ملف غير مدعوم'); return; }
     setUploading(true);
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    let file = rawFile;
+    try {
+      file = await compressImage(rawFile);
+    } catch (e) {
+      console.error("Compression error:", e);
+    }
+
+    if (file.size > 5 * 1024 * 1024) { toast.error('الصورة أكبر من 5 ميغابايت'); setUploading(false); return; }
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
     const { error } = await supabase.storage.from('product-images').upload(fileName, file, { cacheControl: '3600', upsert: false });
     if (error) { toast.error('فشل رفع الصورة: ' + error.message); setUploading(false); return; }
     const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
     setForm((f) => ({ ...f, extra_images: [...(f.extra_images || []), urlData.publicUrl] }));
-    toast.success('تم رفع الصورة ✓');
+    toast.success('تم رفع الصورة بنجاح ✓');
     setUploading(false);
   };
 
