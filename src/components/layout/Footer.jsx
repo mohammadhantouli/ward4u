@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, Flower2, Eye, Tag } from 'lucide-react';
+import { Phone, Mail, MapPin, Eye } from 'lucide-react';
 import { useLang } from '../../context/LangContext';
 import { supabase } from '../../lib/supabase';
 import wardLogo from '../../assets/logo.png';
@@ -96,25 +96,11 @@ export default function Footer() {
       <div className="footer__stats">
         <div className="container footer__stats-inner">
           <div className="footer__stat">
-            <div className="footer__stat-icon footer__stat-icon--pink">
-              <Flower2 size={22} />
-            </div>
-            <span className="footer__stat-num">+{stats.products}</span>
-            <span className="footer__stat-label">منتج متاح</span>
-          </div>
-          <div className="footer__stat">
             <div className="footer__stat-icon footer__stat-icon--rose">
               <Eye size={22} />
             </div>
             <span className="footer__stat-num">+{stats.visits}</span>
             <span className="footer__stat-label">زيارة للموقع</span>
-          </div>
-          <div className="footer__stat">
-            <div className="footer__stat-icon footer__stat-icon--gold">
-              <Tag size={22} />
-            </div>
-            <span className="footer__stat-num">+{stats.categories}</span>
-            <span className="footer__stat-label">تصنيف</span>
           </div>
         </div>
       </div>
