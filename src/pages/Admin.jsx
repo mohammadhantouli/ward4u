@@ -20,19 +20,27 @@ const EMPTY_PRODUCT = { name: '', slug: '', description: '', price: '', original
 
 const compressImage = (file) => {
   return new Promise((resolve) => {
+    // 3-second timeout safeguard to prevent hanging on mobile device memory limits
+    const timeout = setTimeout(() => {
+      console.warn("Image compression timed out. Uploading original file.");
+      resolve(file);
+    }, 3000);
+
     const ext = file.name.split('.').pop().toLowerCase();
     // Do not compress GIFs or files that are not common images
     if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+      clearTimeout(timeout);
       resolve(file);
       return;
     }
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
+    try {
+      const objectUrl = URL.createObjectURL(file);
       const img = new Image();
-      img.src = event.target.result;
+      img.src = objectUrl;
       img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+
         const canvas = document.createElement('canvas');
         const MAX_WIDTH = 1000;
         const MAX_HEIGHT = 1000;
@@ -57,25 +65,38 @@ const compressImage = (file) => {
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
 
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
-                type: 'image/jpeg',
-                lastModified: Date.now(),
-              });
-              resolve(compressedFile);
-            } else {
-              resolve(file);
-            }
-          },
-          'image/jpeg',
-          0.75
-        );
+        if (typeof canvas.toBlob === 'function') {
+          canvas.toBlob(
+            (blob) => {
+              clearTimeout(timeout);
+              if (blob) {
+                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", {
+                  type: 'image/jpeg',
+                  lastModified: Date.now(),
+                });
+                resolve(compressedFile);
+              } else {
+                resolve(file);
+              }
+            },
+            'image/jpeg',
+            0.75
+          );
+        } else {
+          clearTimeout(timeout);
+          resolve(file);
+        }
       };
-      img.onerror = () => resolve(file);
-    };
-    reader.onerror = () => resolve(file);
+      img.onerror = () => {
+        clearTimeout(timeout);
+        URL.revokeObjectURL(objectUrl);
+        resolve(file);
+      };
+    } catch (err) {
+      clearTimeout(timeout);
+      console.error("Error setting up image compression:", err);
+      resolve(file);
+    }
   });
 };
 
