@@ -176,7 +176,7 @@ export default function Home() {
             </div>
             <div className="features-banner__text">
               <h3>دفع آمن</h3>
-              <p>طرق دفع موثوقة ومحمية</p>
+              <p>الدفع عند الاستلام</p>
             </div>
           </div>
 
